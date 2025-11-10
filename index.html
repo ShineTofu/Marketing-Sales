@@ -465,35 +465,71 @@ const todayISO = ()=>{const d=new Date();const tz=new Date(d.getTime()-d.getTime
 const UGXfmt = n => (Number(n)||0).toLocaleString('en-UG',{maximumFractionDigits:0});
 const num = v => (v===''||v==null)?0:Number(v);
 
-/* ---------- Router (Landing -> App) ---------- */
+<script>
+/* ---------- Router (Landing -> App) SAFE ---------- */
 const landing = document.getElementById('landing');
 const landingDate = document.getElementById('landingDate');
 const landingChannel = document.getElementById('landingChannel');
-document.getElementById('resetLanding').onclick = ()=>{ landingDate.value=todayISO(); landingChannel.value=''; };
+const appA = document.getElementById('appA');
+const appB = document.getElementById('appB');
 
-function showApp(which,date,channelLabel){
-  landing.style.display='none';
-  if(which==='A'){ document.getElementById('appA').classList.add('show'); initAppA(date); }
-  else { document.getElementById('appB').classList.add('show'); initAppB(date, channelLabel); }
+function todayISO(){
+  const d=new Date(); const tz=new Date(d.getTime()-d.getTimezoneOffset()*60000);
+  return tz.toISOString().slice(0,10);
 }
-document.getElementById('startBtn').onclick = ()=>{
-  const ch = (landingChannel.value||'').toLowerCase();
+landingDate.value = landingDate.value || todayISO();
+
+function showOnly(which){
+  // always show something even if init throws
+  appA.classList.remove('show'); appB.classList.remove('show');
+  (which==='A'?appA:appB).classList.add('show');
+  landing.style.display='none';
+}
+
+function startApp(){
+  const ch = (landingChannel.value || '').trim().toLowerCase();
   const date = landingDate.value || todayISO();
+
   if(!ch){ alert('Please select a sales channel'); return; }
-  if(['schools','d2c','b2e'].includes(ch)) showApp('A',date,ch);
-  else showApp('B',date, ch==='hawking'?'Hawking':'Market sales');
-};
-landingDate.value = todayISO();
+
+  try {
+    if (['schools','d2c','b2e'].includes(ch)) {
+      showOnly('A');
+      // init after making it visible, and protect with try/catch
+      try { initAppA(date); } catch(err){ console.error(err); alert('Init error (A). Check console.'); }
+    } else if (['hawking','market'].includes(ch)) {
+      showOnly('B');
+      const label = (ch==='hawking'?'Hawking':'Market sales');
+      try { initAppB(date, label); } catch(err){ console.error(err); alert('Init error (B). Check console.'); }
+    } else {
+      alert('Unknown channel: ' + ch);
+    }
+  } catch (e) {
+    console.error(e);
+    // fallback: re-afficher la landing si qqch plante
+    landing.style.display='block';
+    appA.classList.remove('show'); appB.classList.remove('show');
+  }
+}
+
+document.getElementById('startBtn').addEventListener('click', startApp);
+
+// Optionnel : garder le dernier choix
+try {
+  landingChannel.value = localStorage.getItem('lastChannel') || '';
+  landingChannel.addEventListener('change', ()=> localStorage.setItem('lastChannel', landingChannel.value));
+} catch(e){}
 
 /* ---------- Back buttons ---------- */
 function backToLanding(){
-  document.getElementById('appA').classList.remove('show');
-  document.getElementById('appB').classList.remove('show');
   landing.style.display='block';
+  appA.classList.remove('show'); appB.classList.remove('show');
 }
-document.getElementById('backA').onclick = backToLanding;
-document.getElementById('backA2').onclick = backToLanding;
-document.getElementById('backB').onclick = backToLanding;
+['backA','backA2','backB'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.addEventListener('click', backToLanding);
+});
+</script>
 
 /* ===========================================================
    APP A  (Schools / D2C / B2E)  — Marketing sales — Field Data
