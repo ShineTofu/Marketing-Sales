@@ -1,827 +1,845 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Unified Sales Apps (offline)</title>
-<meta name="theme-color" content="#028b43">
-<meta name="format-detection" content="telephone=no" />
-<style>
-  :root{
-    --beige:#f6f3dd; --green:#028b43; --orange:#f8a925; --ink:#0f1b14; --muted:#64748b;
-    --line:#e7e5dc; --card:#ffffff; --ring:rgba(2,139,67,.18); --shadow:0 6px 14px rgba(0,0,0,.05);
-    --border:#e5e7eb;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;background:var(--beige);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;-webkit-text-size-adjust:100%}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sales Suite — Unified (BA payment style)</title>
+  <meta name="description" content="Unified app: BA payment + Marketing sales. One visual, XLSX-only export." />
 
-  /* ===== Landing (selector) ===== */
-  .landing-wrap{max-width:420px;margin:0 auto;padding:0 12px 20px}
-  .topbar{height:34px;background:var(--green);position:sticky;top:0;z-index:30}
-  .landing{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:14px;margin-top:8px}
-  .landing h1{margin:8px 0;font-size:1.2rem;letter-spacing:.04em;text-transform:uppercase}
-  label{display:block;font-weight:700;font-size:.90rem;color:#334155;margin:10px 0 6px}
-  input,select{width:100%;background:#fff;border:1.4px solid var(--border);border-radius:12px;padding:12px 14px;font-size:1rem;min-height:42px;outline:none;transition:border .12s,box-shadow .12s}
-  input:focus,select:focus{border-color:var(--green);box-shadow:0 0 0 4px var(--ring)}
-  .btn{appearance:none;border:0;border-radius:12px;padding:12px 14px;font-weight:800;cursor:pointer;box-shadow:var(--shadow);font-size:.95rem}
-  .primary{background:var(--green);color:#fff}
-  .ghost{background:#fff;border:1px solid var(--border);color:#111827}
-  .row{display:grid;grid-template-columns:1fr;gap:8px}
-  .hint{color:var(--muted);font-size:.82rem;margin-top:8px}
+  <!-- ====== Base styles copied from BA payment to preserve exact look ====== -->
+  <style>
+    :root {
+      --beige: #f6f3dd;
+      --green: #028b43;
+      --orange: #f8a925;
+      --bg: var(--beige);
+      --text: #0b1220;
+      --muted: #475569;
+      --card: #ffffff;
+      --border: #e5e7eb;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; background: var(--bg); color: var(--text); }
+    a { color: var(--green); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .container { width: min(1100px, 94%); margin: 0 auto; }
+    header { position: sticky; top: 0; backdrop-filter: blur(6px); background: color-mix(in oklab, var(--beige) 65%, #fff 35%); border-bottom: 1px solid var(--border); z-index: 10; }
+    .nav { display:flex; align-items:center; justify-content:space-between; padding: 14px 0; }
+    .brand { display:flex; align-items:center; gap:10px; font-weight:800; }
+    .logo { width: 30px; height: 30px; border-radius: 10px; background: var(--green); color: #fff; display:grid; place-items:center; font-weight:900; }
+    .menu { display:flex; gap:16px; color: var(--muted); }
 
-  /* ===== App A (mobile “Marketing sales — Field Data”) ===== */
-  .wrapA{max-width:380px;margin:0 auto;padding:0 12px 14px;display:grid;gap:12px}
-  .topbarA{height:34px;background:var(--green);position:sticky;top:0;z-index:20}
-  header.a{position:sticky;top:34px;z-index:19;background:var(--beige);display:flex;justify-content:space-between;align-items:center;padding:10px 0 8px;border-bottom:1px solid var(--line)}
-  .brand{display:flex;align-items:center;gap:10px}
-  .logo{width:30px;height:30px;border-radius:50%;background:var(--green);display:grid;place-items:center;color:#fff;font-weight:800;letter-spacing:.02em;font-size:.9rem}
-  .appname{font-weight:800;font-size:1rem}
-  .sub{color:#475569;font-size:.86rem;margin-top:-2px}
-  .ver{background:#fff;border:1px solid var(--border);border-radius:999px;padding:5px 9px;font-weight:800;color:#4b5563;font-size:.85rem}
-  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-  button{appearance:none;border:0;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer;box-shadow:var(--shadow);transition:transform .06s ease;font-size:.95rem}
-  button:active{transform:translateY(1px)}
-  .primaryA{background:var(--green);color:#fff}
-  .ghostA{background:#fff;border:1px solid var(--border);color:#111827}
-  .section{background:var(--card);border:1px solid #ecebe3;border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
-  .sec-head{padding:12px 12px 4px}
-  .section h2{margin:0;font-size:1.05rem;letter-spacing:.04em;text-transform:uppercase}
-  .section h3{margin:10px 0 6px 0;font-size:.90rem;letter-spacing:.06em;text-transform:uppercase;color:#374151}
-  .fields{padding:0 12px 12px}
-  .rowA{display:grid;grid-template-columns:1fr;gap:0}
-  .field{padding:8px 0;border-top:1px solid var(--line)} .field:first-child{border-top:0}
-  .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
-  .warn{font-size:.86rem;color:#9a3412;background:#fff7ed;border:1px dashed #fdba74;padding:10px;border-radius:12px;margin-top:8px}
-  .hidden{display:none !important}
-  .actions{padding:10px 12px;border-top:1px solid var(--line)}
-  table{width:100%;border-collapse:separate;border-spacing:0 8px}
-  thead th{font-size:.82rem;color:#475569;text-align:left;padding:6px 8px}
-  tbody tr{background:#fff;border:1px solid #ecebe3}
-  tbody td{padding:8px;border-top:1px solid #ecebe3;border-bottom:1px solid #ecebe3}
-  tbody tr td:first-child{border-left:1px solid #ecebe3;border-top-left-radius:12px;border-bottom-left-radius:12px}
-  tbody tr td:last-child{border-right:1px solid #ecebe3;border-top-right-radius:12px;border-bottom-right-radius:12px}
-  .totals{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:6px;padding:0 12px 12px}
-  .pill{background:#fff;border:1px solid #ecebe3;border-radius:999px;padding:6px 10px;font-weight:800}
+    main { padding: 26px 0; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; box-shadow: 0 6px 20px rgba(2,139,67,0.06); }
+    .grid { display:grid; grid-template-columns: repeat(12, 1fr); gap: 12px; }
+    .span-12 { grid-column: span 12; }
+    .span-6 { grid-column: span 12; }
+    @media (min-width: 860px){ .span-6{ grid-column: span 6; } }
 
-  /* ===== App B (Hawking/Market – BA payment) ===== */
-  .container{width:min(1100px,94%);margin:0 auto}
-  header.b{position:sticky;top:0;background:color-mix(in oklab, var(--beige) 65%, #fff 35%);border-bottom:1px solid var(--border);z-index:15;backdrop-filter:blur(6px)}
-  .nav{display:flex;align-items:center;justify-content:space-between;padding:14px 0}
-  .brandB{display:flex;align-items:center;gap:10px;font-weight:800}
-  .logoB{width:30px;height:30px;border-radius:10px;background:var(--green);color:#fff;display:grid;place-items:center;font-weight:900}
-  .pillB{border-radius:999px;padding:6px 10px;background:#fef3c7;color:#92400e;font-weight:700;font-size:12px}
-  main{padding:26px 0}
-  .card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:0 6px 20px rgba(2,139,67,.06)}
-  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
-  .span-12{grid-column:span 12}
-  .span-6{grid-column:span 12}
-  @media(min-width:860px){.span-6{grid-column:span 6}}
-  h2{font-size:20px;margin:0 0 12px}
-  h3.b{font-size:16px;margin:6px 0 10px;color:#475569;text-transform:uppercase;letter-spacing:.08em}
-  form .rowB{display:grid;grid-template-columns:repeat(12,1fr);gap:12px;margin-bottom:12px}
-  label.b{font-size:12px;color:#475569;font-weight:700;letter-spacing:.02em}
-  input.b, select.b{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#fff;color:var(--ink);font-size:14px}
-  input.b[readonly]{background:#f8fafc;color:#475569}
-  .btn{border:1px solid var(--border);background:#fff;color:var(--ink);padding:10px 16px;border-radius:12px;font-weight:700;cursor:pointer}
-  .btn.primary{background:var(--green);color:#fff;border-color:transparent}
-  .btn.warn{background:var(--orange);color:#222;border-color:transparent}
-  .kpi{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
-  .kpi .tile{grid-column:span 12;border:1px dashed var(--border);border-radius:16px;padding:14px;background:#fff}
-  .kpi .value{font-size:22px;font-weight:800}
-  .kpi .caption{color:#475569;font-size:12px}
-  @media(min-width:860px){.kpi .tile.sm-4{grid-column:span 4}}
-  table.b{width:100%;border-collapse:collapse}
-  th.b,td.b{border-bottom:1px solid var(--border);text-align:left;padding:8px;font-size:13px}
-  thead th.b{position:sticky;top:0;background:#fff8ee;z-index:1}
-  tbody tr:hover{background:#f9fafb}
+    h1 { font-size: clamp(28px, 4vw, 40px); margin: 10px 0 0; }
+    h2 { font-size: 20px; margin: 0 0 12px; }
+    h3 { font-size: 16px; margin: 6px 0 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
 
-  /* Visibility control */
-  #appA,#appB{display:none}
-  .show{display:block}
-  .backbar{position:sticky;bottom:10px;z-index:50;display:flex;justify-content:center}
-  .backbtn{background:#fff;border:1px solid var(--border);padding:10px 14px;border-radius:12px;font-weight:800}
-</style>
+    .hero { padding: 28px 0 10px; }
+    .eyebrow { color: var(--muted); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; font-size: 12px; }
+    .cta { margin-top: 14px; display:flex; gap:10px; flex-wrap: wrap; }
+
+    .btn { border: 1px solid var(--border); background: #fff; color: var(--text); padding: 10px 16px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+    .btn.primary { background: var(--green); color: #fff; border-color: transparent; }
+    .btn.warn { background: var(--orange); color:#222; border-color: transparent; }
+    .pill { border-radius: 999px; padding: 6px 10px; background: #fef3c7; color: #92400e; font-weight: 700; font-size: 12px; }
+
+    form .row { display:grid; grid-template-columns: repeat(12, 1fr); gap: 12px; margin-bottom: 12px; }
+    label { font-size: 12px; color: var(--muted); font-weight: 700; letter-spacing:.02em; }
+    input, select { width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); background: #fff; color: var(--text); font-size: 14px; }
+    input[readonly] { background: #f8fafc; color:#475569; }
+
+    .kpi { display:grid; grid-template-columns: repeat(12, 1fr); gap: 12px; }
+    .kpi .tile { grid-column: span 12; border:1px dashed var(--border); border-radius: 16px; padding: 14px; background: #fff; }
+    .kpi .value { font-size: 22px; font-weight: 800; }
+    .kpi .caption { color: var(--muted); font-size: 12px; }
+    @media (min-width: 860px){ .kpi .tile.sm-4{ grid-column: span 4; } }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border-bottom: 1px solid var(--border); text-align: left; padding: 8px; font-size: 13px; }
+    thead th { position: sticky; top: 0; background: #fff8ee; z-index: 1; }
+    tbody tr:hover { background: #f9fafb; }
+
+    footer { border-top: 1px solid var(--border); color: var(--muted); padding: 18px 0 40px; font-size: 14px; }
+
+    /* helper */
+    .hidden{ display:none !important; }
+    .subnote{ color:var(--muted); font-size:12px; }
+  </style>
 </head>
 <body>
+  <!-- ===== Header (BA payment look) ===== -->
+  <header>
+    <div class="container nav">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">BA</div>
+        <span>Sales Suite (BA payment skin)</span>
+      </div>
+      <nav class="menu" aria-label="Main navigation">
+        <span class="pill">Unified • XLSX only</span>
+      </nav>
+    </div>
+  </header>
 
-  <!-- ===== Landing selector ===== -->
-  <div class="topbar"></div>
-  <div class="landing-wrap" id="landing">
-    <div class="landing">
-      <h1>Choose channel</h1>
-      <div class="row">
-        <div>
-          <label for="landingDate">Date</label>
-          <input type="date" id="landingDate" />
+  <!-- ===== Hero / Intro ===== -->
+  <div class="container hero">
+    <p class="eyebrow">Unified data entry</p>
+    <h1>Record, compute & export</h1>
+    <p style="max-width:760px">One app, two workflows. Choose a date and a sales channel; we’ll load the correct form with those values locked. All exports are XLSX.</p>
+  </div>
+
+  <main class="container">
+    <!-- ===== STEP 1: Common selector (Date + Channel) ===== -->
+    <section class="card" id="selector">
+      <h2>Start</h2>
+      <form id="selector-form" autocomplete="off">
+        <div class="row">
+          <div class="span-6">
+            <label for="sel-date">Date</label>
+            <input type="date" id="sel-date" required />
+          </div>
+          <div class="span-6">
+            <label for="sel-channel">Sales channel</label>
+            <select id="sel-channel" required>
+              <option value="">—</option>
+              <option value="Market">Market</option>
+              <option value="Hawking">Hawking</option>
+              <option value="School">School</option>
+              <option value="D2C">D2C</option>
+              <option value="B2E">B2E</option>
+            </select>
+          </div>
         </div>
-        <div>
-          <label for="landingChannel">Sales channel</label>
-          <select id="landingChannel">
-            <option value="">— Select —</option>
-            <option>Schools</option>
-            <option>D2C</option>
-            <option>B2E</option>
-            <option>Hawking</option>
-            <option>Market</option>
+        <div class="cta">
+          <button class="btn primary" type="submit">Continue</button>
+        </div>
+        <p class="subnote">Market/Hawking → BA payment. School/D2C/B2E → Marketing sales. The chosen Date & Channel will be locked in the form.</p>
+      </form>
+    </section>
+
+    <!-- ===== APP 1: BA payment (original UI) ===== -->
+    <section class="card hidden" id="app1">
+      <h2>BA payment</h2>
+      <!-- Injected locked Sales Channel field for visibility (disabled) -->
+      <div class="row">
+        <div class="span-6">
+          <label for="bp-locked-channel">Sales channel (locked)</label>
+          <select id="bp-locked-channel" disabled>
+            <option value="Market sales">Market sales</option>
+            <option value="Hawking">Hawking</option>
           </select>
         </div>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <button class="btn primary" id="startBtn">Continue</button>
-        <button class="btn ghost" id="resetLanding">Reset</button>
-      </div>
-      <div class="hint">The selected date will be used as the default in the app.</div>
-    </div>
-  </div>
-
-  <!-- ===== APP A : Marketing sales — Field Data (Schools / D2C / B2E) ===== -->
-  <div id="appA">
-    <div class="topbarA"></div>
-    <div class="wrapA">
-      <header class="a">
-        <div class="brand">
-          <div class="logo">MS</div>
-          <div>
-            <div class="appname">Marketing sales</div>
-            <div class="sub">New record</div>
-          </div>
+        <div class="span-6">
+          <label for="bp-locked-date">Date (locked)</label>
+          <input type="date" id="bp-locked-date" readonly />
         </div>
-        <div class="ver">v1.3</div>
-      </header>
-
-      <div class="toolbar">
-        <button class="primaryA" id="addBtnTopA">Record data</button>
-        <button class="ghostA" id="clearAllBtnTopA">Clear all data</button>
-        <button class="ghostA" id="backA">Change channel</button>
       </div>
 
-      <div class="section" id="new-recordA">
-        <div class="sec-head"><h2>New record</h2></div>
-        <div class="fields">
+      <!-- ===== Original BA payment form (kept intact) ===== -->
+      <section id="bp-form" style="margin-top:6px;">
+        <form id="sales-form" autocomplete="off">
+
+          <!-- General information -->
           <h3>General information</h3>
-          <div class="rowA">
-            <div class="field"><label for="dateA">Date</label><input type="date" id="dateA" required></div>
-            <div class="field"><label for="officerA">Channel officer name *</label><input type="text" id="officerA" placeholder="Full name" required></div>
-            <div class="field"><label for="clientA">Client name *</label><input type="text" id="clientA" placeholder="Client" required></div>
-            <div class="field"><label for="districtA">District</label>
-              <select id="districtA"><option>Hoima</option><option>Buliisa</option></select>
-            </div>
-            <div class="field"><label for="areaA">Area</label><input type="text" id="areaA" placeholder="Area / Market"></div>
-          </div>
-
-          <h3>Product</h3>
-          <div class="rowA">
-            <div class="field">
-              <label for="productA">Product</label>
-              <select id="productA">
-                <option value="Fresh">Fresh</option>
-                <option value="Fried">Fried</option>
-                <option value="Skewers">Skewers</option>
-                <option value="Kikalayi">Kikalayi</option>
-              </select>
-              <div id="friedWarnA" class="warn hidden">
-                ⚠️ <strong>FRIED pricing note</strong> — “1 kg of Fried” is priced by <em>fresh (pre-fry)</em> weight.
-                It equals <strong>1 kg of fresh tofu before frying</strong>; the cooked weight will be <strong>less than 1 kg</strong>.
-              </div>
-            </div>
-            <div class="field"><label>Unit price (UGX)</label><input type="number" id="unitPriceA" class="mono" inputmode="decimal" min="0" step="1"></div>
-            <div class="field"><label>Portion weight (kg)</label><input type="number" id="portionWeightA" class="mono" inputmode="decimal" min="0" step="0.01"></div>
-            <div class="field"><label for="qtyKgA">Qty (kg)</label><input type="number" id="qtyKgA" class="mono" inputmode="decimal" min="0" step="0.01" placeholder="e.g. 2.5"></div>
-            <div class="field"><label for="qtyPortionA">Qty (portion)</label><input type="number" id="qtyPortionA" class="mono" inputmode="decimal" min="0" step="1" placeholder="e.g. 10"></div>
-            <div class="field"><label>Calculation</label><input type="text" id="calcModeA" disabled></div>
-            <div class="field"><label>Line total (UGX)</label><input type="text" id="lineTotalA" class="mono" disabled></div>
-          </div>
-
-          <h3>Financial data</h3>
-          <div class="rowA">
-            <div class="field"><label>Transaction total (UGX)</label><input type="text" id="grandTotalA" class="mono" disabled></div>
-            <div class="field"><label for="payModeA">Payment mode</label>
-              <select id="payModeA"><option>Cash</option><option>MoMo</option></select>
-            </div>
-            <div class="field"><label for="amountPaidA">Amount paid (UGX)</label><input type="number" id="amountPaidA" class="mono" inputmode="numeric" min="0" step="1" value="0"></div>
-            <div class="field"><label>Balance (UGX)</label><input type="text" id="balanceA" class="mono" disabled></div>
-          </div>
-
-          <h3>Sample</h3>
-          <div class="rowA">
-            <div class="field"><label for="sampleProductA">Sample product</label>
-              <select id="sampleProductA">
-                <option value="">— None —</option>
-                <option value="Fresh">Fresh</option>
-                <option value="Fried">Fried</option>
-                <option value="Skewers">Skewers</option>
-                <option value="Kikalayi">Kikalayi</option>
-              </select>
-            </div>
-            <div class="field"><label for="sampleQtyKgA">Sample Qty (kg)</label>
-              <input type="number" id="sampleQtyKgA" class="mono" inputmode="decimal" min="0" step="0.01" placeholder="0">
-              <div class="hint" id="sampleKgHintA">Auto for portion-based products</div>
-            </div>
-            <div class="field"><label for="sampleQtyPortionA">Sample Qty (portion)</label>
-              <input type="number" id="sampleQtyPortionA" class="mono" inputmode="decimal" min="0" step="1" placeholder="0">
-              <div class="hint" id="samplePortionHintA">Auto for kg-based products</div>
-            </div>
-          </div>
-
-          <div class="toolbar" style="margin-top:10px">
-            <button class="primaryA" id="addBtnA">Record data</button>
-            <button class="ghostA" id="clearFormBtnA">Reset</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="sec-head"><h2>Records</h2></div>
-        <div class="actions">
-          <div class="toolbar" style="margin:0">
-            <button class="ghostA" id="exportCsvBtnA">Export CSV</button>
-            <button class="ghostA" id="exportXlsxBtnA">Export XLSX</button>
-            <button class="ghostA" id="clearAllBtnA">Clear all data</button>
-          </div>
-        </div>
-        <div class="fields">
-          <div style="overflow:auto;">
-            <table id="dataTableA">
-              <thead>
-                <tr>
-                  <th>Date</th><th>Officer</th><th>Client</th><th>District</th><th>Area</th>
-                  <th>Product</th><th>Calc</th><th>Unit UGX</th><th>Portion kg</th>
-                  <th>Qty kg</th><th>Qty portion</th><th>Line Total</th>
-                  <th>Pay Mode</th><th>Paid</th><th>Balance</th>
-                  <th>Sample Product</th><th>Sample Qty (kg)</th><th>Sample Qty (portion)</th><th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="tableBodyA"></tbody>
-            </table>
-          </div>
-          <div class="totals" id="totalsBarA"></div>
-        </div>
-      </div>
-      <div class="backbar"><button class="backbtn" id="backA2">Change channel</button></div>
-    </div>
-  </div>
-
-  <!-- ===== APP B : BA payment (Hawking / Market) ===== -->
-  <div id="appB">
-    <header class="b">
-      <div class="container nav">
-        <div class="brandB">
-          <div class="logoB" aria-hidden="true">BA</div>
-          <span>BA payment</span>
-        </div>
-        <nav class="menu" aria-label="Main navigation">
-          <span class="pillB">v1.2</span>
-          <button class="btn" id="backB">Change channel</button>
-        </nav>
-      </div>
-    </header>
-
-    <div class="container" style="padding: 26px 0 10px">
-      <p class="eyebrow" style="color:#475569;font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:12px;margin:0">Daily agent sales</p>
-      <h1 style="font-size:clamp(28px,4vw,40px);margin:10px 0 0">Record, compute & export</h1>
-      <div class="cta" style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
-        <a class="btn primary" href="#formB">Record data</a>
-      </div>
-    </div>
-
-    <main class="container">
-      <section class="card" id="formB">
-        <h2>New record</h2>
-        <form id="sales-formB" autocomplete="off">
-          <h3 class="b">General information</h3>
-          <div class="rowB">
+          <div class="row">
             <div class="span-6">
-              <label for="dateB" class="b">Date</label>
-              <input type="date" id="dateB" class="b" required />
+              <label for="date">Date</label>
+              <input type="date" id="date" required />
             </div>
             <div class="span-6">
-              <label for="channelB" class="b">Sales channel</label>
-              <select id="channelB" class="b" required>
+              <label for="channel">Sales channel</label>
+              <select id="channel" required>
                 <option value="">—</option>
                 <option value="Market sales">Market sales</option>
                 <option value="Hawking">Hawking</option>
               </select>
             </div>
           </div>
-          <div class="rowB">
+          <div class="row">
             <div class="span-6">
-              <label for="productB" class="b">Product</label>
-              <select id="productB" class="b" required>
+              <label for="product">Product</label>
+              <select id="product" required>
                 <option value="">—</option>
                 <option value="Kikalayi">Kikalayi</option>
                 <option value="Skewers">Skewers</option>
               </select>
             </div>
             <div class="span-6">
-              <label for="saB" class="b">SA name</label>
-              <input type="text" id="saB" class="b" placeholder="Agent name" required />
+              <label for="sa">SA name</label>
+              <input type="text" id="sa" placeholder="Agent name" required />
             </div>
           </div>
-          <div class="rowB">
+          <div class="row">
             <div class="span-12">
-              <label for="areaB" class="b">Selling area</label>
-              <input type="text" id="areaB" class="b" placeholder="Area / Market" required />
+              <label for="area">Selling area</label>
+              <input type="text" id="area" placeholder="Area / Market" required />
             </div>
           </div>
 
-          <h3 class="b">Product</h3>
-          <div class="rowB">
+          <!-- Product -->
+          <h3>Product</h3>
+          <div class="row">
             <div class="span-6">
-              <label for="unitPriceB" class="b">Unit price (UGX)</label>
-              <input type="number" id="unitPriceB" class="b" step="1" min="0" />
+              <label for="unitPrice">Unit price (UGX)</label>
+              <input type="number" id="unitPrice" step="1" min="0" />
             </div>
             <div class="span-6">
-              <label for="portionWeightB" class="b">Portion weight (kg)</label>
-              <input type="number" id="portionWeightB" class="b" step="0.001" min="0" />
-            </div>
-          </div>
-          <div class="rowB">
-            <div class="span-6">
-              <label for="issuedPortionsB" class="b">Stock issued (portions)</label>
-              <input type="number" id="issuedPortionsB" class="b" step="1" min="0" />
-            </div>
-            <div class="span-6">
-              <label for="issuedKgB" class="b">Stock issued (kg)</label>
-              <input type="number" id="issuedKgB" class="b" step="0.001" readonly />
+              <label for="portionWeight">Portion weight (kg)</label>
+              <input type="number" id="portionWeight" step="0.001" min="0" />
             </div>
           </div>
-          <div class="rowB">
+          <div class="row">
             <div class="span-6">
-              <label for="closingPortionsB" class="b">Closing balance (portions)</label>
-              <input type="number" id="closingPortionsB" class="b" step="1" min="0" />
+              <label for="issuedPortions">Stock issued (portions)</label>
+              <input type="number" id="issuedPortions" step="1" min="0" />
             </div>
             <div class="span-6">
-              <label for="closingKgB" class="b">Closing balance (kg)</label>
-              <input type="number" id="closingKgB" class="b" step="0.001" readonly />
-            </div>
-          </div>
-
-          <h3 class="b">Financial data</h3>
-          <div class="rowB">
-            <div class="span-6">
-              <label for="cashB" class="b">Cash collected (UGX)</label>
-              <input type="number" id="cashB" class="b" step="1" min="0" />
-            </div>
-            <div class="span-6">
-              <label for="actualSalesB" class="b">Actual sales (UGX)</label>
-              <input type="number" id="actualSalesB" class="b" step="1" min="0" readonly />
+              <label for="issuedKg">Stock issued (kg)</label>
+              <input type="number" id="issuedKg" step="0.001" readonly />
             </div>
           </div>
-          <div class="rowB">
+          <div class="row">
             <div class="span-6">
-              <label for="flatRateB" class="b">Flat wedge (UGX)</label>
-              <input type="number" id="flatRateB" class="b" step="1" min="0" />
+              <label for="closingPortions">Closing balance (portions)</label>
+              <input type="number" id="closingPortions" step="1" min="0" />
             </div>
             <div class="span-6">
-              <label for="commissionRateB" class="b">Commission rate (%)</label>
-              <input type="number" id="commissionRateB" class="b" step="0.1" min="0" max="100" />
+              <label for="closingKg">Closing balance (kg)</label>
+              <input type="number" id="closingKg" step="0.001" readonly />
             </div>
           </div>
 
-          <div class="kpi" style="margin-top:6px">
-            <div class="tile sm-4"><div class="caption">Discrepancies (UGX)</div><div class="value" id="kpiDisB">0</div></div>
-            <div class="tile sm-4"><div class="caption">Commission (UGX)</div><div class="value" id="kpiComB">0</div></div>
-            <div class="tile sm-4"><div class="caption">Total amount to be paid (UGX)</div><div class="value" id="kpiTotalB">0</div></div>
-          </div>
-
-          <h3 class="b">Specifics</h3>
-          <div class="rowB">
+          <!-- Financial data -->
+          <h3>Financial data</h3>
+          <div class="row">
             <div class="span-6">
-              <label for="marketFeesB" class="b">Market fees (UGX)</label>
-              <input type="number" id="marketFeesB" class="b" step="1" min="0" />
+              <label for="cash">Cash collected (UGX)</label>
+              <input type="number" id="cash" step="1" min="0" />
             </div>
             <div class="span-6">
-              <label for="advancedMarketFeesB" class="b">Advanced market fees (UGX)</label>
-              <input type="number" id="advancedMarketFeesB" class="b" step="1" min="0" />
+              <label for="actualSales">Actual sales (UGX)</label>
+              <input type="number" id="actualSales" step="1" min="0" readonly />
+            </div>
+          </div>
+          <div class="row">
+            <div class="span-6">
+              <label for="flatRate">Flat wedge (UGX)</label>
+              <input type="number" id="flatRate" step="1" min="0" />
+            </div>
+            <div class="span-6">
+              <label for="commissionRate">Commission rate (%)</label>
+              <input type="number" id="commissionRate" step="0.1" min="0" max="100" />
             </div>
           </div>
 
-          <div class="cta" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+          <div class="kpi" style="margin-top: 6px;">
+            <div class="tile sm-4">
+              <div class="caption">Discrepancies (UGX)</div>
+              <div class="value" id="kpi-discrepancy">0</div>
+            </div>
+            <div class="tile sm-4">
+              <div class="caption">Commission (UGX)</div>
+              <div class="value" id="kpi-commission">0</div>
+            </div>
+            <div class="tile sm-4">
+              <div class="caption">Total amount to be paid (UGX)</div>
+              <div class="value" id="kpi-total">0</div>
+            </div>
+          </div>
+
+          <!-- Specifics -->
+          <h3>Specifics</h3>
+          <div class="row">
+            <div class="span-6">
+              <label for="marketFees">Market fees (UGX)</label>
+              <input type="number" id="marketFees" step="1" min="0" />
+            </div>
+            <div class="span-6">
+              <label for="advancedMarketFees">Advanced market fees (UGX)</label>
+              <input type="number" id="advancedMarketFees" step="1" min="0" />
+            </div>
+          </div>
+
+          <div class="cta" style="margin-top: 14px;">
             <button class="btn primary" type="submit">Record data</button>
-            <button class="btn" type="button" id="resetB">Reset</button>
-            <button class="btn warn" type="button" id="clearDataB">Clear all data</button>
+            <button class="btn" type="button" id="reset-form">Reset</button>
+            <button class="btn warn" type="button" id="clear-data">Clear all data</button>
           </div>
         </form>
       </section>
 
-      <section class="card" id="recordsB" style="margin-top:14px">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <section class="card" id="records" style="margin-top:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
           <h2 style="margin:0">Records</h2>
-          <div class="cta"><button class="btn warn" id="exportXlsxB">Export XLSX</button></div>
+          <div class="cta">
+            <button class="btn warn" id="export-xlsx">Export XLSX</button>
+          </div>
         </div>
-        <div style="overflow:auto;max-height:55vh;margin-top:10px;border:1px solid var(--border);border-radius:12px">
-          <table class="b" id="tableB">
+
+        <div style="overflow:auto; max-height: 55vh; margin-top:10px; border:1px solid var(--border); border-radius: 12px;">
+          <table id="table">
             <thead>
               <tr>
-                <th class="b">Date</th><th class="b">Channel</th><th class="b">Product</th><th class="b">SA name</th><th class="b">Area</th>
-                <th class="b">Unit price (UGX)</th><th class="b">Portion weight (kg)</th><th class="b">Issued (portions)</th>
-                <th class="b">Issued (kg)</th><th class="b">Closing (portions)</th><th class="b">Closing (kg)</th>
-                <th class="b">Cash collected (UGX)</th><th class="b">Actual sales (UGX)</th><th class="b">Discrepancies (UGX)</th>
-                <th class="b">Commission rate (%)</th><th class="b">Commission (UGX)</th><th class="b">Flat wedge (UGX)</th>
-                <th class="b">Total to pay (UGX)</th><th class="b">Market fees (UGX)</th><th class="b">Advanced market fees (UGX)</th><th class="b"></th>
+                <th>Date</th>
+                <th>Channel</th>
+                <th>Product</th>
+                <th>SA name</th>
+                <th>Area</th>
+                <th>Unit price (UGX)</th>
+                <th>Portion weight (kg)</th>
+                <th>Issued (portions)</th>
+                <th>Issued (kg)</th>
+                <th>Closing (portions)</th>
+                <th>Closing (kg)</th>
+                <th>Cash collected (UGX)</th>
+                <th>Actual sales (UGX)</th>
+                <th>Discrepancies (UGX)</th>
+                <th>Commission rate (%)</th>
+                <th>Commission (UGX)</th>
+                <th>Flat wedge (UGX)</th>
+                <th>Total to pay (UGX)</th>
+                <th>Market fees (UGX)</th>
+                <th>Advanced market fees (UGX)</th>
+                <th></th>
               </tr>
             </thead>
-            <tbody id="tbodyB"></tbody>
+            <tbody id="tbody"></tbody>
           </table>
         </div>
       </section>
-    </main>
-  </div>
+    </section>
 
-  <!-- ===== Scripts (both apps + router) ===== -->
-<script>
-/* ---------- Service worker (single-file offline) ---------- */
-(async function setupSW(){
-  if(!("serviceWorker" in navigator)) return;
-  const code = `
-    const CACHE='unified-sales-cache-v1';
-    self.addEventListener('install',e=>{e.waitUntil((async()=>{
-      const c=await caches.open(CACHE); const scope=self.registration.scope;
-      await c.add(new Request(scope,{cache:'reload'}));
-    })()); self.skipWaiting();});
-    self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));
-    self.addEventListener('fetch',e=>{
-      if(e.request.mode==='navigate'||e.request.destination==='document'){
-        e.respondWith((async()=>{
-          const cache=await caches.open(CACHE);
-          const cached=await cache.match(self.registration.scope);
-          return cached||fetch(e.request).catch(()=>cached);
-        })()); return;
-      }
-      e.respondWith((async()=>{
-        const cache=await caches.open(CACHE);
-        const hit=await cache.match(e.request); if(hit) return hit;
-        try{ const resp=await fetch(e.request); if(resp&&resp.ok) cache.put(e.request, resp.clone()); return resp; }
-        catch{ return new Response('',{status:504,statusText:'offline'}); }
-      })());
-    });
-  `;
-  const url=URL.createObjectURL(new Blob([code],{type:'text/javascript'}));
-  try{ await navigator.serviceWorker.register(url,{scope:'./'}); }catch(e){ console.warn('SW register failed', e); }
-})();
+    <!-- ===== APP 2: Marketing sales (ported into BA layout) ===== -->
+    <section class="card hidden" id="app2">
+      <h2>Marketing sales</h2>
+      <!-- Locked channel + date, BA style -->
+      <div class="row">
+        <div class="span-6">
+          <label for="ms-locked-channel">Sales channel (locked)</label>
+          <select id="ms-locked-channel" disabled>
+            <option value="School">School</option>
+            <option value="D2C">D2C</option>
+            <option value="B2E">B2E</option>
+          </select>
+        </div>
+        <div class="span-6">
+          <label for="ms-locked-date">Date (locked)</label>
+          <input type="date" id="ms-locked-date" readonly />
+        </div>
+      </div>
 
-/* ---------- Utilities ---------- */
-const todayISO = ()=>{const d=new Date();const tz=new Date(d.getTime()-d.getTimezoneOffset()*60000);return tz.toISOString().slice(0,10);};
-const UGXfmt = n => (Number(n)||0).toLocaleString('en-UG',{maximumFractionDigits:0});
-const num = v => (v===''||v==null)?0:Number(v);
+      <section id="ms-form" style="margin-top:6px;">
+        <h3>New record</h3>
+        <div class="row">
+          <div class="span-6"><label for="ms-date">Date</label><input type="date" id="ms-date" required></div>
+          <div class="span-6"><label for="ms-officer">Channel officer name *</label><input type="text" id="ms-officer" placeholder="Full name" required></div>
+        </div>
+        <div class="row">
+          <div class="span-6"><label for="ms-client">Client name *</label><input type="text" id="ms-client" placeholder="Client" required></div>
+          <div class="span-6"><label for="ms-district">District</label>
+            <select id="ms-district"><option>Hoima</option><option>Buliisa</option></select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="span-12"><label for="ms-area">Area</label><input type="text" id="ms-area" placeholder="Area / Market"></div>
+        </div>
 
-<script>
-/* ---------- Router (Landing -> App) SAFE ---------- */
-const landing = document.getElementById('landing');
-const landingDate = document.getElementById('landingDate');
-const landingChannel = document.getElementById('landingChannel');
-const appA = document.getElementById('appA');
-const appB = document.getElementById('appB');
+        <h3>Product</h3>
+        <div class="row">
+          <div class="span-6">
+            <label for="ms-product">Product</label>
+            <select id="ms-product">
+              <option value="Fresh">Fresh</option>
+              <option value="Fried">Fried</option>
+              <option value="Skewers">Skewers</option>
+              <option value="Kikalayi">Kikalayi</option>
+            </select>
+            <div id="ms-friedWarn" class="subnote hidden" style="margin-top:6px">
+              ⚠️ <strong>FRIED pricing note</strong> — “1 kg of Fried” is priced by <em>fresh (pre-fry)</em> weight.
+            </div>
+          </div>
+          <div class="span-6"><label for="ms-unitPrice">Unit price (UGX)</label><input type="number" id="ms-unitPrice" inputmode="decimal" min="0" step="1"></div>
+        </div>
+        <div class="row">
+          <div class="span-6"><label for="ms-portionWeight">Portion weight (kg)</label><input type="number" id="ms-portionWeight" inputmode="decimal" min="0" step="0.01"></div>
+          <div class="span-6"><label for="ms-calcMode">Calculation</label><input type="text" id="ms-calcMode" disabled></div>
+        </div>
+        <div class="row">
+          <div class="span-6"><label for="ms-qtyKg">Qty (kg)</label><input type="number" id="ms-qtyKg" inputmode="decimal" min="0" step="0.01" placeholder="e.g. 2.5"></div>
+          <div class="span-6"><label for="ms-qtyPortion">Qty (portion)</label><input type="number" id="ms-qtyPortion" inputmode="decimal" min="0" step="1" placeholder="e.g. 10"></div>
+        </div>
+        <div class="row">
+          <div class="span-6"><label for="ms-lineTotal">Line total (UGX)</label><input type="text" id="ms-lineTotal" disabled></div>
+          <div class="span-6"><label for="ms-grandTotal">Transaction total (UGX)</label><input type="text" id="ms-grandTotal" disabled></div>
+        </div>
 
-function todayISO(){
-  const d=new Date(); const tz=new Date(d.getTime()-d.getTimezoneOffset()*60000);
-  return tz.toISOString().slice(0,10);
-}
-landingDate.value = landingDate.value || todayISO();
+        <h3>Financial data</h3>
+        <div class="row">
+          <div class="span-6"><label for="ms-payMode">Payment mode</label>
+            <select id="ms-payMode"><option>Cash</option><option>MoMo</option></select>
+          </div>
+          <div class="span-6"><label for="ms-amountPaid">Amount paid (UGX)</label><input type="number" id="ms-amountPaid" inputmode="numeric" min="0" step="1" value="0"></div>
+        </div>
+        <div class="row">
+          <div class="span-6"><label for="ms-balance">Balance (UGX)</label><input type="text" id="ms-balance" disabled></div>
+        </div>
 
-function showOnly(which){
-  // always show something even if init throws
-  appA.classList.remove('show'); appB.classList.remove('show');
-  (which==='A'?appA:appB).classList.add('show');
-  landing.style.display='none';
-}
+        <h3>Sample</h3>
+        <div class="row">
+          <div class="span-6"><label for="ms-sampleProduct">Sample product</label>
+            <select id="ms-sampleProduct">
+              <option value="">— None —</option>
+              <option value="Fresh">Fresh</option>
+              <option value="Fried">Fried</option>
+              <option value="Skewers">Skewers</option>
+              <option value="Kikalayi">Kikalayi</option>
+            </select>
+          </div>
+          <div class="span-6"><label for="ms-sampleQtyKg">Sample Qty (kg)</label>
+            <input type="number" id="ms-sampleQtyKg" inputmode="decimal" min="0" step="0.01" placeholder="0">
+            <div class="subnote" id="ms-sampleKgHint">Auto for portion-based products</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="span-6"><label for="ms-sampleQtyPortion">Sample Qty (portion)</label>
+            <input type="number" id="ms-sampleQtyPortion" inputmode="decimal" min="0" step="1" placeholder="0">
+            <div class="subnote" id="ms-samplePortionHint">Auto for kg-based products</div>
+          </div>
+        </div>
 
-function startApp(){
-  const ch = (landingChannel.value || '').trim().toLowerCase();
-  const date = landingDate.value || todayISO();
+        <div class="cta" style="margin-top:10px">
+          <button class="btn primary" id="ms-addBtn">Record data</button>
+          <button class="btn" id="ms-clearFormBtn">Reset</button>
+        </div>
+      </section>
 
-  if(!ch){ alert('Please select a sales channel'); return; }
+      <section class="card" style="margin-top:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+          <h2 style="margin:0">Records</h2>
+          <div class="cta" style="margin:0">
+            <!-- XLSX only -->
+            <button class="btn warn" id="ms-exportXlsxBtn">Export XLSX</button>
+            <button class="btn" id="ms-clearAllBtn">Clear all data</button>
+          </div>
+        </div>
+        <div style="overflow:auto; max-height: 55vh; margin-top:10px; border:1px solid var(--border); border-radius: 12px;">
+          <table id="ms-dataTable">
+            <thead>
+              <tr>
+                <th>Date</th><th>Officer</th><th>Client</th><th>District</th><th>Area</th>
+                <th>Product</th><th>Calc</th><th>Unit UGX</th><th>Portion kg</th>
+                <th>Qty kg</th><th>Qty portion</th><th>Line Total</th>
+                <th>Pay Mode</th><th>Paid</th><th>Balance</th>
+                <th>Sample Product</th><th>Sample Qty (kg)</th><th>Sample Qty (portion)</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ms-tableBody"></tbody>
+          </table>
+        </div>
+        <div class="cta" id="ms-totalsBar" style="justify-content:flex-end"></div>
+      </section>
+    </section>
+  </main>
 
-  try {
-    if (['schools','d2c','b2e'].includes(ch)) {
-      showOnly('A');
-      // init after making it visible, and protect with try/catch
-      try { initAppA(date); } catch(err){ console.error(err); alert('Init error (A). Check console.'); }
-    } else if (['hawking','market'].includes(ch)) {
-      showOnly('B');
-      const label = (ch==='hawking'?'Hawking':'Market sales');
-      try { initAppB(date, label); } catch(err){ console.error(err); alert('Init error (B). Check console.'); }
-    } else {
-      alert('Unknown channel: ' + ch);
+  <footer>
+    <div class="container">
+      <small>
+        © <span id="year"></span> Sales Suite — BA look. | <a id="source-link" href="#">Source code</a>
+      </small>
+    </div>
+  </footer>
+
+  <!-- ===== XLSX lib (for both flows) ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <script>
+    // ======= COMMON: init header/footer =======
+    document.getElementById('year').textContent = new Date().getFullYear();
+    document.getElementById('source-link').href = '#';
+
+    // ======= COMMON: selector logic & routing =======
+    const selDate = document.getElementById('sel-date');
+    const selChannel = document.getElementById('sel-channel');
+    const selectorCard = document.getElementById('selector');
+    const app1 = document.getElementById('app1');
+    const app2 = document.getElementById('app2');
+
+    function todayISO(){
+      const d=new Date();
+      const tz=new Date(d.getTime()-d.getTimezoneOffset()*60000);
+      return tz.toISOString().slice(0,10);
     }
-  } catch (e) {
-    console.error(e);
-    // fallback: re-afficher la landing si qqch plante
-    landing.style.display='block';
-    appA.classList.remove('show'); appB.classList.remove('show');
-  }
-}
+    selDate.value = todayISO();
 
-document.getElementById('startBtn').addEventListener('click', startApp);
+    function routeTarget(channel){
+      if(channel==='Hawking' || channel==='Market') return 'app1';
+      if(channel==='School' || channel==='D2C' || channel==='B2E') return 'app2';
+      return null;
+    }
 
-// Optionnel : garder le dernier choix
-try {
-  landingChannel.value = localStorage.getItem('lastChannel') || '';
-  landingChannel.addEventListener('change', ()=> localStorage.setItem('lastChannel', landingChannel.value));
-} catch(e){}
+    function showSection(which){
+      app1.classList.toggle('hidden', which!=='app1');
+      app2.classList.toggle('hidden', which!=='app2');
+      selectorCard.classList.toggle('hidden', true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-/* ---------- Back buttons ---------- */
-function backToLanding(){
-  landing.style.display='block';
-  appA.classList.remove('show'); appB.classList.remove('show');
-}
-['backA','backA2','backB'].forEach(id=>{
-  const el=document.getElementById(id);
-  if(el) el.addEventListener('click', backToLanding);
-});
-</script>
+    // Map external channel -> BA select value
+    const BA_CHANNEL_MAP = { 'Market':'Market sales', 'Hawking':'Hawking' };
 
-/* ===========================================================
-   APP A  (Schools / D2C / B2E)  — Marketing sales — Field Data
-   =========================================================== */
-const PRODS_A = {
-  "Fresh":    { unitPrice: 6000, portionWeight: 1.00, mode: "kg"       },
-  "Fried":    { unitPrice: 7500, portionWeight: 1.00, mode: "kg" },
-  "Skewers":  { unitPrice: 1000, portionWeight: 0.06, mode: "portion"  },
-  "Kikalayi": { unitPrice:  500, portionWeight: 0.04, mode: "portion"  }
-};
-const $A = s => document.querySelector(s);
-const KEY_A='field-data-records-v1';
+    document.getElementById('selector-form').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const dt = selDate.value; const ch = selChannel.value;
+      const tgt = routeTarget(ch);
+      if(!dt || !tgt){ alert('Please select Date and Sales channel.'); return; }
 
-function initAppA(dateVal){
-  // set date
-  $A('#dateA').value = dateVal || todayISO();
-
-  // defaults + events
-  function setDefaultsA(){
-    const cfg=PRODS_A[$A('#productA').value];
-    $A('#unitPriceA').value=cfg.unitPrice; $A('#portionWeightA').value=cfg.portionWeight;
-    $A('#qtyKgA').value=''; $A('#qtyPortionA').value=''; calcA();
-  }
-  function calcA(){
-    const prod=$A('#productA').value, cfg=PRODS_A[prod];
-    const unit= num($A('#unitPriceA').value||cfg.unitPrice);
-    const w= num($A('#portionWeightA').value||cfg.portionWeight);
-    let kg=num($A('#qtyKgA').value), pt=num($A('#qtyPortionA').value);
-
-    if(cfg.mode==='kg'){ if(kg>0) pt=kg/w; $A('#qtyPortionA').value=pt>0?Math.round(pt):''; }
-    else { if(pt>0) kg=pt*w; $A('#qtyKgA').value=kg>0?kg.toFixed(2):''; }
-
-    const line=(cfg.mode==='kg'?unit*kg:unit*pt);
-    $A('#lineTotalA').value=UGXfmt(line); $A('#grandTotalA').value=UGXfmt(line);
-    const paid=num($A('#amountPaidA').value);
-    $A('#balanceA').value=UGXfmt(Math.max(line-paid,0));
-    $A('#calcModeA').value=(cfg.mode==='kg'?'by kg':'by portion');
-
-    $A('#friedWarnA').classList.toggle('hidden', prod!=='Fried');
-    $A('#qtyKgA').disabled=(cfg.mode!=='kg'); $A('#qtyPortionA').disabled=(cfg.mode!=='portion');
-  }
-  function setSampleConstraintsA(){
-    const s=$A('#sampleProductA').value, kg=$A('#sampleQtyKgA'), pt=$A('#sampleQtyPortionA');
-    const cfg=PRODS_A[s]||null;
-    if(!cfg){kg.disabled=false;pt.disabled=false;return;}
-    if(cfg.mode==='kg'){kg.disabled=false;pt.disabled=true;pt.value='';}
-    else {kg.disabled=true;kg.value='';pt.disabled=false;}
-    calcSampleA();
-  }
-  function calcSampleA(){
-    const s=$A('#sampleProductA').value; if(!s) return;
-    const cfg=PRODS_A[s], w=cfg.portionWeight;
-    let skg=num($A('#sampleQtyKgA').value), sp=num($A('#sampleQtyPortionA').value);
-    if(cfg.mode==='kg'){ if(skg>0){ sp=skg/w; $A('#sampleQtyPortionA').value=sp>0?Math.round(sp):''; } }
-    else { if(sp>0){ skg=sp*w; $A('#sampleQtyKgA').value=skg>0?skg.toFixed(2):''; } }
-  }
-  function validateA(){
-    const req=[['#officerA','Channel officer name'],['#clientA','Client name']];
-    const miss=req.filter(([sel])=>!$A(sel).value.trim());
-    if(miss.length){ alert('Please fill: '+miss.map(([,n])=>n).join(', ')); return false; }
-    return true;
-  }
-  function loadA(){try{return JSON.parse(localStorage.getItem(KEY_A)||'[]')}catch{return[]}}
-  function saveA(r){localStorage.setItem(KEY_A,JSON.stringify(r))}
-  function renderA(){
-    const tb=$A('#tableBodyA'); tb.innerHTML='';
-    const rows=loadA();
-    rows.forEach((r,i)=>{
-      const tr=document.createElement('tr');
-      const cell=t=>{const d=document.createElement('td'); d.textContent=t; return d;};
-      tr.append(cell(r.date),cell(r.officer),cell(r.client),cell(r.district),cell(r.area),cell(r.product),
-               cell(r.calcMode),cell(UGXfmt(r.unitPrice)),cell((r.portionWeight||0).toFixed(2)),
-               cell((r.qtyKg||0).toFixed(2)),cell(r.qtyPortion||0),cell(UGXfmt(r.lineTotal)),
-               cell(r.payMode),cell(UGXfmt(r.paid)),cell(UGXfmt(r.balance)),
-               cell(r.sampleProduct||''),cell((r.sampleQtyKg||0).toFixed(2)),cell(r.sampleQtyPortion||0));
-      const act=document.createElement('td'); const b=document.createElement('button'); b.className='ghostA'; b.textContent='🗑️'; b.onclick=()=>{const all=loadA();all.splice(i,1);saveA(all);renderA();}; act.appendChild(b); tr.appendChild(act);
-      tb.appendChild(tr);
-    });
-    const totals=loadA().reduce((a,r)=>({t:a.t+r.lineTotal,p:a.p+r.paid,b:a.b+r.balance}),{t:0,p:0,b:0});
-    const bar=$A('#totalsBarA'); bar.innerHTML='';
-    [['Total',totals.t],['Paid',totals.p],['Balance',totals.b]].forEach(([l,v])=>{
-      const d=document.createElement('div'); d.className='pill'; d.textContent=`${l}: UGX ${UGXfmt(v)}`; bar.appendChild(d);
-    });
-  }
-  function exportCSV_A(){
-    const rows=JSON.parse(localStorage.getItem(KEY_A)||'[]'); if(!rows.length){alert('No data to export.');return;}
-    const header=["Date","Officer","Client","District","Area","Product","Calc","Unit UGX","Portion kg","Qty kg","Qty portion","Line Total","Pay Mode","Paid","Balance","Sample Product","Sample Qty (kg)","Sample Qty (portion)"];
-    const esc=v=>{const s=(v==null?'':String(v)); return /[",\n]/.test(s)?`"${s.replace(/"/g,'""')}"`:s;};
-    const lines=[header.join(',')];
-    rows.forEach(r=>lines.push([r.date,r.officer,r.client,r.district,r.area,r.product,r.calcMode,r.unitPrice,(r.portionWeight||0).toFixed(2),(r.qtyKg||0).toFixed(2),r.qtyPortion,r.lineTotal,r.payMode,r.paid,r.balance,r.sampleProduct||'',(r.sampleQtyKg||0).toFixed(2),r.sampleQtyPortion||0].map(esc).join(',')));
-    const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`marketing-sales-${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(a.href);
-  }
-  function exportXLSX_A(){
-    const rows=JSON.parse(localStorage.getItem(KEY_A)||'[]'); if(!rows.length){alert('No data to export.');return;}
-    const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    const th=["Date","Officer","Client","District","Area","Product","Calc","Unit UGX","Portion kg","Qty kg","Qty portion","Line Total","Pay Mode","Paid","Balance","Sample Product","Sample Qty (kg)","Sample Qty (portion)"].map(h=>`<th>${esc(h)}</th>`).join('');
-    const trs=rows.map(r=>`<tr><td>${esc(r.date)}</td><td>${esc(r.officer)}</td><td>${esc(r.client)}</td><td>${esc(r.district)}</td><td>${esc(r.area)}</td><td>${esc(r.product)}</td><td>${esc(r.calcMode)}</td><td>${esc(r.unitPrice)}</td><td>${esc((r.portionWeight||0).toFixed(2))}</td><td>${esc((r.qtyKg||0).toFixed(2))}</td><td>${esc(r.qtyPortion||0)}</td><td>${esc(r.lineTotal)}</td><td>${esc(r.payMode)}</td><td>${esc(r.paid)}</td><td>${esc(r.balance)}</td><td>${esc(r.sampleProduct||'')}</td><td>${esc((r.sampleQtyKg||0).toFixed(2))}</td><td>${esc(r.sampleQtyPortion||0)}</td></tr>`).join('');
-    const html='<!DOCTYPE html><meta charset="utf-8"><table border="1"><thead><tr>'+th+'</tr></thead><tbody>'+trs+'</tbody></table>';
-    const blob=new Blob([html],{type:'application/vnd.ms-excel;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`marketing-sales-${new Date().toISOString().slice(0,10)}.xlsx`; a.click(); URL.revokeObjectURL(a.href);
-  }
-  function buildRowA(){
-    const prod=$A('#productA').value, cfg=PRODS_A[prod];
-    const unit=num($A('#unitPriceA').value||cfg.unitPrice);
-    const w=num($A('#portionWeightA').value||cfg.portionWeight);
-    const kg=num($A('#qtyKgA').value), pt=num($A('#qtyPortionA').value);
-    const line=(cfg.mode==='kg'?unit*kg:unit*pt);
-    const paid=num($A('#amountPaidA').value), bal=Math.max(line-paid,0);
-    return {date:$A('#dateA').value, officer:$A('#officerA').value.trim(), client:$A('#clientA').value.trim(), district:$A('#districtA').value, area:$A('#areaA').value.trim(), product:prod, calcMode:(cfg.mode==='kg'?'kg':'portion'), unitPrice:unit, portionWeight:w, qtyKg:kg||0, qtyPortion:pt||0, lineTotal:Math.round(line), payMode:$A('#payModeA').value, paid:Math.round(paid), balance:Math.round(bal), sampleProduct:$A('#sampleProductA').value||'', sampleQtyKg:num($A('#sampleQtyKgA').value)||0, sampleQtyPortion:num($A('#sampleQtyPortionA').value)||0 };
-  }
-  function clearFormA(){
-    $A('#dateA').value = $A('#dateA').value || todayISO();
-    $A('#officerA').value=''; $A('#clientA').value=''; $A('#districtA').value='Hoima'; $A('#areaA').value='';
-    $A('#productA').value='Fresh'; setDefaultsA();
-    $A('#amountPaidA').value=0; $A('#sampleProductA').value=''; $A('#sampleQtyKgA').value=''; $A('#sampleQtyPortionA').value=''; setSampleConstraintsA();
-  }
-
-  // Wire events once
-  if(!initAppA._wired){
-    $A('#productA').addEventListener('change', setDefaultsA);
-    ['#unitPriceA','#portionWeightA','#qtyKgA','#qtyPortionA','#amountPaidA'].forEach(s=>$A(s).addEventListener('input',calcA));
-    $A('#sampleProductA').addEventListener('change', setSampleConstraintsA);
-    $A('#sampleQtyKgA').addEventListener('input', calcSampleA);
-    $A('#sampleQtyPortionA').addEventListener('input', calcSampleA);
-    const add=()=>{ if(!validateA()) return; const all=JSON.parse(localStorage.getItem(KEY_A)||'[]'); all.push(buildRowA()); localStorage.setItem(KEY_A,JSON.stringify(all)); renderA(); clearFormA(); window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}); };
-    document.getElementById('addBtnA').onclick = add;
-    document.getElementById('addBtnTopA').onclick = add;
-    const clearAll=()=>{ if(!confirm('Delete ALL stored data?'))return; localStorage.removeItem(KEY_A); renderA(); };
-    document.getElementById('clearAllBtnA').onclick = clearAll;
-    document.getElementById('clearAllBtnTopA').onclick = clearAll;
-    document.getElementById('exportCsvBtnA').onclick = exportCSV_A;
-    document.getElementById('exportXlsxBtnA').onclick = exportXLSX_A;
-    document.getElementById('clearFormBtnA').onclick = (e)=>{e.preventDefault(); clearFormA();};
-    initAppA._wired=true;
-  }
-  setDefaultsA(); setSampleConstraintsA(); calcA(); renderA();
-}
-
-/* ===========================================================
-   APP B  (Hawking / Market)  — BA payment  (no external libs)
-   =========================================================== */
-const defaultsB = { Kikalayi:{price:500,weight:0.03}, Skewers:{price:1000,weight:0.045} };
-function initAppB(dateVal, channelLabel){
-  const g = id=>document.getElementById(id);
-
-  // set initial values
-  (function setToday(){ try{ g('dateB').valueAsDate=new Date(); }catch{ g('dateB').value=todayISO(); } })();
-  if(dateVal) g('dateB').value = dateVal;
-  if(channelLabel) g('channelB').value = channelLabel;
-
-  // helpers
-  const KG3 = n => (isFinite(n)?Number(n).toFixed(3):(0).toFixed(3));
-  const UGX = n => (isFinite(n)?Math.round(Number(n)):0);
-
-  const applyProductDefaults = ()=>{
-    const d = (g('productB').value || '');
-    const D = /kikal/i.test(d)?defaultsB.Kikalayi : /skewer/i.test(d)?defaultsB.Skewers : null;
-    g('unitPriceB').value = D ? D.price : 0;
-    g('portionWeightB').value = D ? D.weight : 0;
-    computeB();
-  };
-  const applyChannelDefaults = ()=>{
-    const ch = g('channelB').value;
-    if (ch === 'Market sales'){ g('flatRateB').value = 5000; g('commissionRateB').value = 20; }
-    else if (ch === 'Hawking'){ g('flatRateB').value = 0; g('commissionRateB').value = 20; }
-    else { g('flatRateB').value = 0; g('commissionRateB').value = 0; }
-    computeB();
-  };
-
-  let warned=false;
-  const computeB = ()=>{
-    const w = num(g('portionWeightB').value);
-    const issuedP = num(g('issuedPortionsB').value);
-    const closingP = num(g('closingPortionsB').value);
-    const price = num(g('unitPriceB').value);
-
-    const issuedK = issuedP * w, closingK = closingP * w;
-    g('issuedKgB').value = KG3(issuedK); g('closingKgB').value = KG3(closingK);
-
-    const actual = (issuedP - closingP) * price; g('actualSalesB').value = UGX(actual);
-
-    const ch = g('channelB').value;
-    const rate = ch ? num(g('commissionRateB').value) : 0;
-    const flat = ch ? UGX(num(g('flatRateB').value)) : 0;
-
-    const discrepancy = UGX(actual) - UGX(num(g('cashB').value));
-    const commission  = UGX((rate/100) * UGX(actual));
-    const totalToPay  = UGX(flat + commission - discrepancy);
-
-    g('kpiDisB').textContent = UGX(discrepancy).toLocaleString();
-    g('kpiComB').textContent = UGX(commission).toLocaleString();
-    g('kpiTotalB').textContent = UGX(totalToPay).toLocaleString();
-
-    if(discrepancy<0){ if(!warned){ alert(`Warning: Cash collected exceeds computed sales by ${Math.abs(discrepancy).toLocaleString()} UGX.`); warned=true; } }
-    else warned=false;
-  };
-
-  // events (wire once)
-  if(!initAppB._wired){
-    ['input','change'].forEach(evt=>{
-      [ 'productB','portionWeightB','issuedPortionsB','closingPortionsB','unitPriceB','cashB','commissionRateB','flatRateB' ]
-        .forEach(id=> g(id).addEventListener(evt, computeB));
-    });
-    ['change','input'].forEach(evt=> g('productB').addEventListener(evt, applyProductDefaults));
-    ['change','input'].forEach(evt=> g('channelB').addEventListener(evt, applyChannelDefaults));
-    g('resetB').onclick = ()=>{ g('sales-formB').reset(); (g('dateB').value = todayISO()); g('commissionRateB').value=20; g('flatRateB').value=5000; applyChannelDefaults(); applyProductDefaults(); computeB(); };
-
-    // Storage
-    const KEY='ba_payment_records_v1_2';
-    const load=()=>JSON.parse(localStorage.getItem(KEY)||'[]');
-    const save=r=>localStorage.setItem(KEY,JSON.stringify(r));
-    const render=()=>{
-      const rows=load(); const tb=document.getElementById('tbodyB'); tb.innerHTML='';
-      rows.forEach((r,i)=>{
-        const tr=document.createElement('tr');
-        tr.innerHTML = `
-          <td class="b">${r.date}</td><td class="b">${r.channel||''}</td><td class="b">${r.prod||''}</td>
-          <td class="b">${r.sa||''}</td><td class="b">${r.area||''}</td>
-          <td class="b">${(r.price||0).toLocaleString()}</td><td class="b">${(r.weight||0).toFixed(3)}</td>
-          <td class="b">${r.issuedP||0}</td><td class="b">${(r.issuedK||0).toFixed(3)}</td>
-          <td class="b">${r.closingP||0}</td><td class="b">${(r.closingK||0).toFixed(3)}</td>
-          <td class="b">${(r.cashCollected||0).toLocaleString()}</td>
-          <td class="b">${(r.actual||0).toLocaleString()}</td>
-          <td class="b">${(r.discrepancy||0).toLocaleString()}</td>
-          <td class="b">${(r.rate!=null&&r.rate!==''?r.rate+'%':'0%')}</td>
-          <td class="b">${(r.commission||0).toLocaleString()}</td>
-          <td class="b">${(r.flat||0).toLocaleString()}</td>
-          <td class="b">${(r.totalToPay||0).toLocaleString()}</td>
-          <td class="b">${(r.marketFees||0).toLocaleString()}</td>
-          <td class="b">${(r.advancedMarketFees||0).toLocaleString()}</td>
-          <td class="b"><button class="btn" data-del="${i}">Delete</button></td>`;
-        tb.appendChild(tr);
-      });
-    };
-    document.getElementById('tbodyB').addEventListener('click',e=>{
-      const b=e.target.closest('button[data-del]'); if(!b) return;
-      const i=Number(b.dataset.del); const rows=load(); rows.splice(i,1); save(rows); render();
+      if(tgt==='app1'){
+        // Lock banners
+        document.getElementById('bp-locked-date').value = dt;
+        document.getElementById('bp-locked-channel').value = BA_CHANNEL_MAP[ch] || '';
+        // Fill real form fields and lock them
+        const bpDate = document.getElementById('date');
+        const bpChannel = document.getElementById('channel');
+        if (bpDate){ bpDate.value = dt; bpDate.readOnly = true; }
+        if (bpChannel){ bpChannel.value = BA_CHANNEL_MAP[ch] || ''; bpChannel.disabled = true; ['change','input'].forEach(ev=>bpChannel.dispatchEvent(new Event(ev))); }
+        showSection('app1');
+      } else {
+        // Marketing: lock banners
+        document.getElementById('ms-locked-date').value = dt;
+        const msLockedCh = document.getElementById('ms-locked-channel');
+        // ensure value exists among options
+        if ([...msLockedCh.options].some(o=>o.value===ch)) { msLockedCh.value = ch; }
+        else { msLockedCh.insertAdjacentHTML('beforeend', `<option value="${ch}">${ch}</option>`); msLockedCh.value = ch; }
+        // Fill real form fields and lock date
+        const msDate = document.getElementById('ms-date');
+        if (msDate){ msDate.value = dt; msDate.readOnly = true; }
+        showSection('app2');
+      }
     });
 
-    // submit
-    document.getElementById('sales-formB').addEventListener('submit',e=>{
-      e.preventDefault(); computeB();
-      const d = id=>g(id).value;
-      const w = Number(num(d('portionWeightB')).toFixed(3));
-      const issuedK = Number((num(d('issuedPortionsB'))*num(d('portionWeightB'))).toFixed(3));
-      const closingK = Number((num(d('closingPortionsB'))*num(d('portionWeightB'))).toFixed(3));
-      const actual = Math.round((num(d('issuedPortionsB'))-num(d('closingPortionsB')))*num(d('unitPriceB')));
-      const rate = (d('channelB')===''?0:num(d('commissionRateB')));
-      const commission = Math.round((rate/100)*actual);
-      const flat=(d('channelB')===''?0:Math.round(num(d('flatRateB'))));
-      const discrepancy = actual - Math.round(num(d('cashB')));
-      const total = flat + commission - discrepancy;
+    // ======= BA PAYMENT: original logic (unchanged) =======
+    (function BA_Payment(){
+      // Helpers
+      const UGX = (n) => (isFinite(n) ? Math.round(Number(n)) : 0);
+      const KG3 = (n) => (isFinite(n) ? Number(n).toFixed(3) : (0).toFixed(3));
+      const num = (n) => (n === '' || n === null || n === undefined ? 0 : Number(n));
 
-      const row = {
-        date:d('dateB'), channel:d('channelB'), prod:d('productB'), sa:d('saB'), area:d('areaB'),
-        price:Math.round(num(d('unitPriceB'))), weight:w,
-        issuedP:Math.round(num(d('issuedPortionsB'))), issuedK, closingP:Math.round(num(d('closingPortionsB'))), closingK,
-        cashCollected:Math.round(num(d('cashB'))), actual, discrepancy, rate, commission, flat, totalToPay:total,
-        marketFees:Math.round(num(d('marketFeesB'))), advancedMarketFees:Math.round(num(d('advancedMarketFeesB')))
+      const defaults = { Kikalayi: { price: 500,  weight: 0.03 }, Skewers: { price: 1000, weight: 0.045 }, };
+
+      const el = (id) => document.getElementById(id);
+      const product = el('product');
+      const unitPrice = el('unitPrice');
+      const portionWeight = el('portionWeight');
+      const issuedPortions = el('issuedPortions');
+      const issuedKg = el('issuedKg');
+      const closingPortions = el('closingPortions');
+      const closingKg = el('closingKg');
+      const actualSales = el('actualSales');
+      const cash = el('cash');
+      const flatRate = el('flatRate');
+      const commissionRate = el('commissionRate');
+      const marketFees = el('marketFees');
+      const advancedMarketFees = el('advancedMarketFees');
+
+      const kpiDis = el('kpi-discrepancy');
+      const kpiCom = el('kpi-commission');
+      const kpiTotal = el('kpi-total');
+
+      const form = el('sales-form');
+      const tbody = el('tbody');
+
+      const STORAGE_KEY = 'ba_payment_records_v1_2';
+      const loadRecords = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      const saveRecords = (rows) => localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
+
+      const getDefaultsFor = (name) => {
+        const key = String(name || '').toLowerCase().trim();
+        if (key.startsWith('kikal')) return defaults.Kikalayi;
+        if (key.startsWith('skewer')) return defaults.Skewers;
+        return null;
       };
-      const rows=load(); rows.unshift(row); save(rows); render(); e.target.reset(); g('dateB').value=todayISO(); applyChannelDefaults(); applyProductDefaults(); computeB();
-    });
 
-    // clear all
-    document.getElementById('clearDataB').onclick = ()=>{ if(confirm('Clear all saved records?')){ localStorage.setItem(KEY,'[]'); render(); } };
+      const applyProductDefaults = () => {
+        const val = (product.value || '').trim();
+        if (!val) { unitPrice.value = 0; portionWeight.value = 0; }
+        else { const d = getDefaultsFor(val) || defaults.Kikalayi; unitPrice.value = d.price; portionWeight.value = d.weight; }
+        compute();
+      };
 
-    // export XLSX (Excel-compatible HTML, offline)
-    document.getElementById('exportXlsxB').onclick = ()=>{
-      const rows=JSON.parse(localStorage.getItem('ba_payment_records_v1_2')||'[]');
-      if(!rows.length) return alert('No data to export');
-      const header = ["Date","Sales channel","Product","SA name","Area","Unit price (UGX)","Portion weight (kg)","Issued (portions)","Issued (kg)","Closing (portions)","Closing (kg)","Cash collected (UGX)","Actual sales (UGX)","Discrepancies (UGX)","Commission rate (%)","Commission (UGX)","Flat wedge (UGX)","Total amount to be paid (UGX)","Market fees (UGX)","Advanced market fees (UGX)"];
-      const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      const th=header.map(h=>`<th>${esc(h)}</th>`).join('');
-      const trs=rows.map(r=>`<tr>
-        <td>${esc(r.date)}</td><td>${esc(r.channel||'')}</td><td>${esc(r.prod||'')}</td><td>${esc(r.sa||'')}</td><td>${esc(r.area||'')}</td>
-        <td>${esc(r.price||0)}</td><td>${esc((r.weight||0).toFixed? r.weight.toFixed(3): r.weight)}</td>
-        <td>${esc(r.issuedP||0)}</td><td>${esc((r.issuedK||0).toFixed? r.issuedK.toFixed(3): r.issuedK)}</td>
-        <td>${esc(r.closingP||0)}</td><td>${esc((r.closingK||0).toFixed? r.closingK.toFixed(3): r.closingK)}</td>
-        <td>${esc(r.cashCollected||0)}</td><td>${esc(r.actual||0)}</td><td>${esc(r.discrepancy||0)}</td>
-        <td>${esc(r.rate!=null?r.rate:0)}%</td><td>${esc(r.commission||0)}</td><td>${esc(r.flat||0)}</td><td>${esc(r.totalToPay||0)}</td>
-        <td>${esc(r.marketFees||0)}</td><td>${esc(r.advancedMarketFees||0)}</td></tr>`).join('');
-      const html='<!DOCTYPE html><meta charset="utf-8"><table border="1"><thead><tr>'+th+'</tr></thead><tbody>'+trs+'</tbody></table>';
-      const blob=new Blob([html],{type:'application/vnd.ms-excel;charset=utf-8'}); const a=document.createElement('a');
-      const pad=n=>String(n).padStart(2,'0'); const d=new Date();
-      a.href=URL.createObjectURL(blob); a.download=`BA Payment - ${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.xlsx`; a.click(); URL.revokeObjectURL(a.href);
-    };
+      function applyChannelDefaults(){
+        const ch = el('channel').value;
+        if (ch === 'Market sales') { flatRate.value = 5000; commissionRate.value = 20; }
+        else if (ch === 'Hawking') { flatRate.value = 0; commissionRate.value = 20; }
+        else if (ch === '') { flatRate.value = 0; commissionRate.value = 0; }
+        compute();
+      }
 
-    initAppB._wired=true;
-    initAppB._render = render;
-  }
-  // init defaults and compute
-  applyChannelDefaults(); applyProductDefaults(); computeB(); initAppB._render && initAppB._render();
-}
-</script>
+      document.addEventListener('wheel', (e) => {
+        const t = e.target; if (t && t.tagName === 'INPUT' && t.type === 'number') { t.blur(); }
+      }, { passive: true });
+
+      function isFeesOnlyMode(){ return num(marketFees.value) > 0 || num(advancedMarketFees.value) > 0; }
+
+      function updateRequired(){
+        const feesOnly = isFeesOnlyMode();
+        el('date').required = true;
+        const requiredIds = [ 'channel','product','sa','area','unitPrice','portionWeight','issuedPortions','closingPortions','cash','commissionRate','flatRate' ];
+        requiredIds.forEach(id => { const node = el(id); if (!node) return; node.required = !feesOnly; });
+      }
+
+      let warnedCashOver = false;
+
+      const compute = () => {
+        const w = num(portionWeight.value);
+        const issuedP = num(issuedPortions.value);
+        const closingP = num(closingPortions.value);
+        const price = num(unitPrice.value);
+
+        const issuedK = issuedP * w;
+        const closingK = closingP * w;
+
+        issuedKg.value = KG3(issuedK);
+        closingKg.value = KG3(closingK);
+
+        const actual = (issuedP - closingP) * price;
+        actualSales.value = UGX(actual);
+
+        const ch = el('channel').value;
+        const effectiveRate = (ch === '' ? 0 : num(commissionRate.value));
+        const flatVal      = (ch === '' ? 0 : UGX(num(flatRate.value)));
+
+        const discrepancy = UGX(actual) - UGX(num(cash.value));
+        const commission  = UGX((effectiveRate / 100) * UGX(actual));
+        const totalToPay  = UGX(flatVal + commission - discrepancy);
+
+        kpiDis.textContent   = UGX(discrepancy).toLocaleString();
+        kpiCom.textContent   = UGX(commission).toLocaleString();
+        kpiTotal.textContent = UGX(totalToPay).toLocaleString();
+
+        if (discrepancy < 0) {
+          if (!warnedCashOver) { alert(`Warning: Cash collected exceeds computed sales by ${Math.abs(discrepancy).toLocaleString()} UGX.`); warnedCashOver = true; }
+        } else { warnedCashOver = false; }
+      };
+
+      function setTodaySafe() {
+        const d = el('date');
+        try { d.valueAsDate = new Date(); } catch { d.value = new Date().toISOString().slice(0,10); }
+      }
+
+      (function init(){
+        // Defaults on initial page load; real locking happens after selector submit
+        commissionRate.value = 20; flatRate.value = 5000; setTodaySafe(); applyChannelDefaults(); applyProductDefaults(); compute(); renderTable(); updateRequired();
+      })();
+
+      ['input','change'].forEach(evt => {
+        [product, portionWeight, issuedPortions, closingPortions, unitPrice, cash, commissionRate, flatRate]
+          .forEach(x => x.addEventListener(evt, compute));
+      });
+      ['change','input'].forEach(evt => product.addEventListener(evt, applyProductDefaults));
+      ['change','input'].forEach(evt => el('channel').addEventListener(evt, applyChannelDefaults));
+      [marketFees, advancedMarketFees].forEach(x => { x.addEventListener('input', updateRequired); x.addEventListener('change', updateRequired); });
+
+      function collectFormData(){
+        const date = el('date').value;
+        const channel = el('channel').value;
+        const prod = product.value;
+        const sa = el('sa').value;
+        const area = el('area').value;
+        const price = UGX(num(unitPrice.value));
+        const weight = Number(num(portionWeight.value).toFixed(3));
+        const issuedP = UGX(num(issuedPortions.value));
+        const issuedK = Number((num(issuedPortions.value) * num(portionWeight.value)).toFixed(3));
+        const closingP = UGX(num(closingPortions.value));
+        const closingK = Number((num(closingPortions.value) * num(portionWeight.value)).toFixed(3));
+        const cashCollected = UGX(num(cash.value));
+        const actual = UGX((num(issuedPortions.value) - num(closingPortions.value)) * num(unitPrice.value));
+        const effectiveRate = (channel === '' ? 0 : Number(num(commissionRate.value)));
+        const commission = UGX((effectiveRate/100) * actual);
+        const flat = (channel === '' ? 0 : UGX(num(flatRate.value)));
+        const discrepancy = UGX(actual - cashCollected);
+        const totalToPay  = UGX(flat + commission - discrepancy);
+        const mFees = UGX(num(marketFees.value));
+        const aFees = UGX(num(advancedMarketFees.value));
+        return { date, channel, prod, sa, area, price, weight, issuedP, issuedK, closingP, closingK, cashCollected, actual, discrepancy, rate: effectiveRate, commission, flat, totalToPay, marketFees: mFees, advancedMarketFees: aFees };
+      }
+
+      function renderTable(){
+        const rows = loadRecords();
+        tbody.innerHTML = '';
+        rows.forEach((r, idx) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${r.date}</td>
+            <td>${r.channel||''}</td>
+            <td>${r.prod||''}</td>
+            <td>${r.sa||''}</td>
+            <td>${r.area||''}</td>
+            <td>${(r.price||0).toLocaleString()}</td>
+            <td>${(r.weight||0).toFixed(3)}</td>
+            <td>${r.issuedP||0}</td>
+            <td>${(r.issuedK||0).toFixed(3)}</td>
+            <td>${r.closingP||0}</td>
+            <td>${(r.closingK||0).toFixed(3)}</td>
+            <td>${(r.cashCollected||0).toLocaleString()}</td>
+            <td>${(r.actual||0).toLocaleString()}</td>
+            <td>${(r.discrepancy||0).toLocaleString()}</td>
+            <td>${(r.rate != null && r.rate !== '' ? r.rate + '%' : '0%')}</td>
+            <td>${(r.commission||0).toLocaleString()}</td>
+            <td>${(r.flat||0).toLocaleString()}</td>
+            <td>${(r.totalToPay||0).toLocaleString()}</td>
+            <td>${(r.marketFees||0).toLocaleString()}</td>
+            <td>${(r.advancedMarketFees||0).toLocaleString()}</td>
+            <td><button class="btn" data-del="${idx}">Delete</button></td>`;
+          tbody.appendChild(tr);
+        });
+      }
+
+      tbody.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-del]'); if(!btn) return;
+        const idx = Number(btn.dataset.del);
+        const rows = loadRecords(); rows.splice(idx, 1); saveRecords(rows); renderTable();
+      });
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if(!ensureRequired()) return;
+        compute();
+        const row = collectFormData();
+        const rows = loadRecords(); rows.unshift(row); saveRecords(rows); renderTable();
+        form.reset(); setTodaySafe(); commissionRate.value = 20; flatRate.value = 5000; applyChannelDefaults(); applyProductDefaults(); compute(); updateRequired();
+      });
+
+      function ensureRequired(){
+        if (!el('date').value) { alert('Please fill: Date'); return false; }
+        if (isFeesOnlyMode()) return true;
+        const fields = [ ['channel','Sales channel'], ['product','Product'], ['sa','SA name'], ['area','Selling area'], ['unitPrice','Unit price'], ['portionWeight','Portion weight'], ['issuedPortions','Stock issued (portions)'], ['closingPortions','Closing balance (portions)'], ['cash','Cash collected'], ['commissionRate','Commission rate'], ['flatRate','Flat wedge'] ];
+        for (const [id,label] of fields){ const n = el(id); if (!n || n.value === '' || n.value === null) { alert('Please fill: ' + label); return false; } }
+        return true;
+      }
+
+      document.getElementById('reset-form').addEventListener('click', () => { form.reset(); setTodaySafe(); commissionRate.value = 20; flatRate.value = 5000; applyChannelDefaults(); applyProductDefaults(); compute(); updateRequired(); });
+      document.getElementById('clear-data').addEventListener('click', () => { if(confirm('Clear all saved records?')) { localStorage.setItem(STORAGE_KEY, '[]'); renderTable(); } });
+      ;[cash, marketFees, advancedMarketFees].forEach(x => x.addEventListener('input', compute));
+
+      document.getElementById('export-xlsx').addEventListener('click', () => {
+        const rows = loadRecords(); if(rows.length === 0) return alert('No data to export');
+        const headerMap = { date: 'Date', channel: 'Sales channel', prod: 'Product', sa: 'SA name', area: 'Selling area', price: 'Unit price (UGX)', weight: 'Portion weight (kg)', issuedP: 'Stock issued (portions)', issuedK: 'Stock issued (kg)', closingP: 'Closing balance (portions)', closingK: 'Closing balance (kg)', cashCollected: 'Cash collected (UGX)', actual: 'Actual sales (UGX)', discrepancy: 'Discrepancies (UGX)', rate: 'Commission rate (%)', commission: 'Commission (UGX)', flat: 'Flat wedge (UGX)', totalToPay: 'Total amount to be paid (UGX)', marketFees: 'Market fees (UGX)', advancedMarketFees: 'Advanced market fees (UGX)' };
+        const exportRows = rows.map(r => { const o = {}; for (const [k,label] of Object.entries(headerMap)) { o[label] = r[k]; } return o; });
+        const ws = XLSX.utils.json_to_sheet(exportRows); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'BA payment');
+        const pad = (n)=> String(n).padStart(2,'0'); const d = new Date(); const fname = `BA Payment - ${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.xlsx`;
+        XLSX.writeFile(wb, fname);
+      });
+    })();
+
+    // ======= MARKETING SALES: adapted to BA layout, XLSX only, namespaced IDs =======
+    (function Marketing(){
+      const PRODUCTS = { "Fresh":{ unitPrice:6000, portionWeight:1.00, mode:"kg" }, "Fried":{ unitPrice:7500, portionWeight:1.00, mode:"kg" }, "Skewers":{ unitPrice:1000, portionWeight:0.06, mode:"portion" }, "Kikalayi":{ unitPrice:500, portionWeight:0.04, mode:"portion" } };
+      const $ = (s)=>document.querySelector(s);
+      const fmt = n => (Number(n)||0).toLocaleString('en-UG',{maximumFractionDigits:0});
+      const num = v => v===''||v==null?0:Number(v);
+
+      const KEY='field-data-records-v1';
+      const load = ()=>{ try{return JSON.parse(localStorage.getItem(KEY)||'[]');}catch{return []} };
+      const save = (r)=> localStorage.setItem(KEY, JSON.stringify(r));
+
+      function setDefaults(){
+        const prod=$('#ms-product').value; const cfg=PRODUCTS[prod];
+        $('#ms-unitPrice').value=cfg.unitPrice; $('#ms-portionWeight').value=cfg.portionWeight;
+        $('#ms-qtyKg').value=''; $('#ms-qtyPortion').value=''; calc();
+      }
+      function calc(){
+        const prod=$('#ms-product').value, cfg=PRODUCTS[prod];
+        const unit= num($('#ms-unitPrice').value||cfg.unitPrice);
+        const w =   num($('#ms-portionWeight').value||cfg.portionWeight);
+        let qKg=   num($('#ms-qtyKg').value), qP=num($('#ms-qtyPortion').value);
+        if(cfg.mode==='kg'){ if(qKg>0){ qP=qKg/w; $('#ms-qtyPortion').value=qP>0?Math.round(qP):''; } $('#ms-qtyKg').disabled=false; $('#ms-qtyPortion').disabled=true; }
+        else { if(qP>0){ qKg=qP*w; $('#ms-qtyKg').value=qKg>0?qKg.toFixed(2):''; } $('#ms-qtyKg').disabled=true; $('#ms-qtyPortion').disabled=false; }
+        const total=(cfg.mode==='kg'?unit*qKg:unit*qP);
+        $('#ms-lineTotal').value=fmt(total); $('#ms-grandTotal').value=fmt(total);
+        const paid=num($('#ms-amountPaid').value); $('#ms-balance').value=fmt(Math.max(total-paid,0));
+        $('#ms-calcMode').value=(cfg.mode==='kg'?'by kg':'by portion');
+        $('#ms-friedWarn').classList.toggle('hidden', prod!=='Fried');
+      }
+
+      function setSampleConstraints(){
+        const s=$('#ms-sampleProduct').value, kg=$('#ms-sampleQtyKg'), pt=$('#ms-sampleQtyPortion');
+        if(!s){ kg.disabled=false; pt.disabled=false; $('#ms-sampleKgHint').textContent='Auto for portion-based products'; $('#ms-samplePortionHint').textContent='Auto for kg-based products'; return; }
+        const cfg=PRODUCTS[s];
+        if(cfg.mode==='kg'){ kg.disabled=false; pt.disabled=true; pt.value=''; $('#ms-sampleKgHint').textContent='Enter kg (portions auto)'; $('#ms-samplePortionHint').textContent='Auto (kg-based)'; }
+        else { kg.disabled=true; kg.value=''; pt.disabled=false; $('#ms-sampleKgHint').textContent='Auto (portion-based)'; $('#ms-samplePortionHint').textContent='Enter portions (kg auto)'; }
+        calcSample();
+      }
+      function calcSample(){
+        const s=$('#ms-sampleProduct').value; if(!s) return;
+        const w=PRODUCTS[s].portionWeight; let skg=num($('#ms-sampleQtyKg').value), sp=num($('#ms-sampleQtyPortion').value);
+        if(PRODUCTS[s].mode==='kg'){ if(skg>0){ sp=skg/w; $('#ms-sampleQtyPortion').value=sp>0?Math.round(sp):''; } }
+        else { if(sp>0){ skg=sp*w; $('#ms-sampleQtyKg').value=skg>0?skg.toFixed(2):''; } }
+      }
+
+      function buildRow(){
+        const prod=$('#ms-product').value, cfg=PRODUCTS[prod];
+        const unit=num($('#ms-unitPrice').value||cfg.unitPrice);
+        const w=num($('#ms-portionWeight').value||cfg.portionWeight);
+        const qKg=num($('#ms-qtyKg').value), qP=num($('#ms-qtyPortion').value);
+        const total=(cfg.mode==='kg'?unit*qKg:unit*qP);
+        const paid=num($('#ms-amountPaid').value); const bal=Math.max(total-paid,0);
+        const sProd=$('#ms-sampleProduct').value||''; const sKg=num($('#ms-sampleQtyKg').value); const sP=num($('#ms-sampleQtyPortion').value);
+        return { date:$('#ms-date').value, officer:$('#ms-officer').value.trim(), client:$('#ms-client').value.trim(), district:$('#ms-district').value, area:$('#ms-area').value.trim(), product:prod, calcMode:(cfg.mode==='kg'?'kg':'portion'), unitPrice:unit, portionWeight:w, qtyKg:qKg||0, qtyPortion:qP||0, lineTotal:Math.round(total), payMode:$('#ms-payMode').value, paid:Math.round(paid), balance:Math.round(bal), sampleProduct:sProd, sampleQtyKg:sKg||0, sampleQtyPortion:sP||0 };
+      }
+
+      function render(){
+        const tb=$('#ms-tableBody'); tb.innerHTML='';
+        const rows=load(); rows.forEach((r,i)=>{
+          const tr=document.createElement('tr');
+          const td=t=>{const d=document.createElement('td'); d.textContent=t; return d;};
+          tr.appendChild(td(r.date)); tr.appendChild(td(r.officer)); tr.appendChild(td(r.client));
+          tr.appendChild(td(r.district)); tr.appendChild(td(r.area)); tr.appendChild(td(r.product));
+          tr.appendChild(td(r.calcMode)); tr.appendChild(td(fmt(r.unitPrice)));
+          tr.appendChild(td((r.portionWeight||0).toFixed(2))); tr.appendChild(td((r.qtyKg||0).toFixed(2)));
+          tr.appendChild(td(r.qtyPortion||0)); tr.appendChild(td(fmt(r.lineTotal)));
+          tr.appendChild(td(r.payMode)); tr.appendChild(td(fmt(r.paid))); tr.appendChild(td(fmt(r.balance)));
+          tr.appendChild(td(r.sampleProduct||'')); tr.appendChild(td((r.sampleQtyKg||0).toFixed(2))); tr.appendChild(td(r.sampleQtyPortion||0));
+          const a=document.createElement('td'); const b=document.createElement('button'); b.className='btn'; b.textContent='Delete'; b.onclick=()=>{ const rws=load(); rws.splice(i,1); save(rws); render(); }; a.appendChild(b); tr.appendChild(a);
+          tb.appendChild(tr);
+        });
+        const totals=rows.reduce((a,r)=>({total:a.total+r.lineTotal,paid:a.paid+r.paid,bal:a.bal+r.balance}),{total:0,paid:0,bal:0});
+        const bar=$('#ms-totalsBar'); bar.innerHTML='';
+        const pill = (l,v)=>{ const d=document.createElement('div'); d.className='pill'; d.textContent=`${l}: UGX ${fmt(v)}`; return d; };
+        bar.appendChild(pill('Total', totals.total)); bar.appendChild(pill('Paid', totals.paid)); bar.appendChild(pill('Balance', totals.bal));
+      }
+
+      function exportXLSX(){
+        const rows=load(); if(!rows.length){alert('No data to export.');return;}
+        const header=["Date","Officer","Client","District","Area","Product","Calc","Unit UGX","Portion kg","Qty kg","Qty portion","Line Total","Pay Mode","Paid","Balance","Sample Product","Sample Qty (kg)","Sample Qty (portion)"];
+        const exportRows = rows.map(r=>({
+          [header[0]]:r.date,[header[1]]:r.officer,[header[2]]:r.client,[header[3]]:r.district,[header[4]]:r.area,[header[5]]:r.product,[header[6]]:r.calcMode,[header[7]]:r.unitPrice,[header[8]]:(r.portionWeight||0).toFixed(2),[header[9]]:(r.qtyKg||0).toFixed(2),[header[10]]:r.qtyPortion,[header[11]]:r.lineTotal,[header[12]]:r.payMode,[header[13]]:r.paid,[header[14]]:r.balance,[header[15]]:r.sampleProduct||'',[header[16]]:(r.sampleQtyKg||0).toFixed(2),[header[17]]:r.sampleQtyPortion }));
+        const ws = XLSX.utils.json_to_sheet(exportRows); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Marketing sales');
+        const pad=(n)=> String(n).padStart(2,'0'); const d=new Date(); const fname=`field-data-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.xlsx`;
+        XLSX.writeFile(wb, fname);
+      }
+
+      function clearAll(){ if(!confirm('Delete ALL stored data?')) return; localStorage.removeItem(KEY); render(); }
+      function clearForm(){ $('#ms-officer').value=''; $('#ms-client').value=''; $('#ms-district').value='Hoima'; $('#ms-area').value=''; $('#ms-product').value='Fresh'; setDefaults(); $('#ms-amountPaid').value=0; $('#ms-sampleProduct').value=''; $('#ms-sampleQtyKg').value=''; $('#ms-sampleQtyPortion').value=''; setSampleConstraints(); }
+
+      // Events
+      (function init(){
+        document.getElementById('ms-date').value=todayISO(); setDefaults(); setSampleConstraints(); calc(); render();
+        document.getElementById('ms-product').addEventListener('change', setDefaults);
+        ['#ms-unitPrice','#ms-portionWeight','#ms-qtyKg','#ms-qtyPortion','#ms-amountPaid'].forEach(s=>$(s).addEventListener('input', calc));
+        document.getElementById('ms-sampleProduct').addEventListener('change', setSampleConstraints);
+        document.getElementById('ms-sampleQtyKg').addEventListener('input', calcSample);
+        document.getElementById('ms-sampleQtyPortion').addEventListener('input', calcSample);
+        document.getElementById('ms-addBtn').addEventListener('click', (e)=>{ e.preventDefault(); if(!$('#ms-officer').value.trim()||!$('#ms-client').value.trim()){ alert('Please fill: Channel officer name, Client name'); return; } const r=load(); r.push(buildRow()); save(r); render(); clearForm(); window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}); });
+        document.getElementById('ms-clearAllBtn').addEventListener('click', (e)=>{ e.preventDefault(); clearAll(); });
+        document.getElementById('ms-exportXlsxBtn').addEventListener('click', (e)=>{ e.preventDefault(); exportXLSX(); });
+        document.getElementById('ms-clearFormBtn').addEventListener('click', (e)=>{ e.preventDefault(); clearForm(); });
+      })();
+    })();
+  </script>
 </body>
 </html>
