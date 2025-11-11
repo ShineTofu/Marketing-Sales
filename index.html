@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Marketing sales — Unified</title>
-  <meta name="description" content="Unified app: BA payment + Marketing sales. One visual, XLSX-only export." />
+  <meta name="description" content="Unified sales capture across channels. Export the consolidated table to XLSX and upload it to the appropriate Drive folder." />
 
   <!-- ====== Base styles copied from BA payment to preserve exact look ====== -->
   <style>
@@ -73,7 +73,7 @@
   </style>
 </head>
 <body>
-  <!-- ===== Header (BA payment look) ===== -->
+  <!-- ===== Header (Marketing Sales) ===== -->
   <header>
     <div class="container nav">
       <div class="brand">
@@ -90,7 +90,7 @@
   <div class="container hero">
     <p class="eyebrow">Unified data entry</p>
     <h1>Record, compute & export</h1>
-    <p style="max-width:760px">Cette application permet de récolter les données de ventes nécessaires. Le tableau final est à exporter en XLSX et à déposer sur le Drive dans le dossier correspondant.</p>
+    <p style="max-width:760px">This application streamlines the collection of required sales data across channels. Export the consolidated table as an XLSX file and upload it to the appropriate Drive folder.</p>
   </div>
 
   <main class="container">
@@ -118,16 +118,16 @@
         <div class="cta">
           <button class="btn primary" type="submit">Continue</button>
         </div>
-        <p class="subnote">Market/Hawking → BA payment. School/D2C/B2E → Marketing sales. The chosen Date & Channel will be locked in the form.</p>
+        <p class="subnote">Market/Hawking → Marketing sales. School/D2C/B2E → Marketing sales. The chosen Date & Channel will be locked in the form.</p>
       </form>
     </section>
 
-    <!-- ===== APP 1: BA payment (original UI) ===== -->
+    <!-- ===== APP 1: Marketing sales (was BA payment UI) ===== -->
     $1
       <div class="cta" style="margin-top:6px">
-        <button class="btn" id="back-btn-1">Changer de channel</button>
+        <button class="btn" id="back-btn-1">Change channel</button>
       </div>
-      <!-- Injected locked Sales Channel field for visibility (disabled) -->
+      <!-- Locked Sales Channel field for visibility (disabled) -->
       <div class="row">
         <div class="span-6">
           <label for="bp-locked-channel">Sales channel (locked)</label>
@@ -142,7 +142,7 @@
         </div>
       </div>
 
-      <!-- ===== Original BA payment form (kept intact) ===== -->
+      <!-- ===== Former BA payment form (labels unchanged) ===== -->
       <section id="bp-form" style="margin-top:6px;">
         <form id="sales-form" autocomplete="off">
 
@@ -319,7 +319,7 @@
     <!-- ===== APP 2: Marketing sales (ported into BA layout) ===== -->
     $1
       <div class="cta" style="margin-top:6px">
-        <button class="btn" id="back-btn-2">Changer de channel</button>
+        <button class="btn" id="back-btn-2">Change channel</button>
       </div>
       <!-- Locked channel + date, BA style -->
       <div class="row">
@@ -452,7 +452,7 @@
   <footer>
     <div class="container">
       <small>
-        © <span id="year"></span> Sales Suite — BA look. | <a id="source-link" href="#">Source code</a>
+        © <span id="year"></span> Marketing Sales — Unified. | <a id="source-link" href="#">Source code</a>
       </small>
     </div>
   </footer>
@@ -492,7 +492,7 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Map external channel -> BA select value
+    // Map external channel -> select value
     const BA_CHANNEL_MAP = { 'Market':'Market sales', 'Hawking':'Hawking' };
 
     document.getElementById('selector-form').addEventListener('submit', (e)=>{
@@ -525,7 +525,7 @@
       }
     });
 
-    // ======= BA PAYMENT: original logic (unchanged) =======
+    // ======= MARKET/HAWKING FLOW (former BA_Payment, logic unchanged) =======
     (function BA_Payment(){
       // Helpers
       const UGX = (n) => (isFinite(n) ? Math.round(Number(n)) : 0);
@@ -733,13 +733,13 @@
         const rows = loadRecords(); if(rows.length === 0) return alert('No data to export');
         const headerMap = { date: 'Date', channel: 'Sales channel', prod: 'Product', sa: 'SA name', area: 'Selling area', price: 'Unit price (UGX)', weight: 'Portion weight (kg)', issuedP: 'Stock issued (portions)', issuedK: 'Stock issued (kg)', closingP: 'Closing balance (portions)', closingK: 'Closing balance (kg)', cashCollected: 'Cash collected (UGX)', actual: 'Actual sales (UGX)', discrepancy: 'Discrepancies (UGX)', rate: 'Commission rate (%)', commission: 'Commission (UGX)', flat: 'Flat wedge (UGX)', totalToPay: 'Total amount to be paid (UGX)', marketFees: 'Market fees (UGX)', advancedMarketFees: 'Advanced market fees (UGX)' };
         const exportRows = rows.map(r => { const o = {}; for (const [k,label] of Object.entries(headerMap)) { o[label] = r[k]; } return o; });
-        const ws = XLSX.utils.json_to_sheet(exportRows); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'BA payment');
-        const pad = (n)=> String(n).padStart(2,'0'); const d = new Date(); const fname = `BA Payment - ${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.xlsx`;
+        const ws = XLSX.utils.json_to_sheet(exportRows); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Marketing sales');
+        const pad = (n)=> String(n).padStart(2,'0'); const d = new Date(); const fname = `Marketing Sales - ${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.xlsx`;
         XLSX.writeFile(wb, fname);
       });
     })();
 
-    // ======= MARKETING SALES: adapted to BA layout, XLSX only, namespaced IDs =======
+    // ======= MARKETING SALES (School/D2C/B2E) =======
     (function Marketing(){
       const PRODUCTS = { "Fresh":{ unitPrice:6000, portionWeight:1.00, mode:"kg" }, "Fried":{ unitPrice:7500, portionWeight:1.00, mode:"kg" }, "Skewers":{ unitPrice:1000, portionWeight:0.06, mode:"portion" }, "Kikalayi":{ unitPrice:500, portionWeight:0.04, mode:"portion" } };
       const $ = (s)=>document.querySelector(s);
@@ -820,7 +820,8 @@
         const rows=load(); if(!rows.length){alert('No data to export.');return;}
         const header=["Date","Officer","Client","District","Area","Product","Calc","Unit UGX","Portion kg","Qty kg","Qty portion","Line Total","Pay Mode","Paid","Balance","Sample Product","Sample Qty (kg)","Sample Qty (portion)"];
         const exportRows = rows.map(r=>({
-          [header[0]]:r.date,[header[1]]:r.officer,[header[2]]:r.client,[header[3]]:r.district,[header[4]]:r.area,[header[5]]:r.product,[header[6]]:r.calcMode,[header[7]]:r.unitPrice,[header[8]]:(r.portionWeight||0).toFixed(2),[header[9]]:(r.qtyKg||0).toFixed(2),[header[10]]:r.qtyPortion,[header[11]]:r.lineTotal,[header[12]]:r.payMode,[header[13]]:r.paid,[header[14]]:r.balance,[header[15]]:r.sampleProduct||'',[header[16]]:(r.sampleQtyKg||0).toFixed(2),[header[17]]:r.sampleQtyPortion }));
+          [header[0]]:r.date,[header[1]]:r.officer,[header[2]]:r.client,[header[3]]:r.district,[header[4]]:r.area,[header[5]]:r.product,[header[6]]:r.calcMode,[header[7]]:r.unitPrice,[header[8]]:(r.portionWeight||0).toFixed(2),[header[9]]:(r.qtyKg||0).toFixed(2),[header[10]]:r.qtyPortion,[header[11]]:r.lineTotal,[header[12]]:r.payMode,[header[13]]:r.paid,[header[14]]:r.balance,[header[15]]:r.sampleProduct||'',
+          [header[16]]:(r.sampleQtyKg||0).toFixed(2),[header[17]]:r.sampleQtyPortion }));
         const ws = XLSX.utils.json_to_sheet(exportRows); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Marketing sales');
         const pad=(n)=> String(n).padStart(2,'0'); const d=new Date(); const fname=`field-data-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.xlsx`;
         XLSX.writeFile(wb, fname);
