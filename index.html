@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Marketing sales — Unified</title>
-  <meta name="description" content="Unified sales capture across channels. Export the consolidated table to XLSX and upload it to the appropriate Drive folder." />
+  <title>Sales Suite — Unified (BA payment style)</title>
+  <meta name="description" content="Unified app: BA payment + Marketing sales. One visual, XLSX-only export." />
 
   <!-- ====== Base styles copied from BA payment to preserve exact look ====== -->
   <style>
@@ -73,12 +73,12 @@
   </style>
 </head>
 <body>
-  <!-- ===== Header (Marketing Sales) ===== -->
+  <!-- ===== Header (BA payment look) ===== -->
   <header>
     <div class="container nav">
       <div class="brand">
-        <div class="logo" aria-hidden="true">MS</div>
-        <span>Marketing sales</span>
+        <div class="logo" aria-hidden="true">BA</div>
+        <span>Sales Suite (BA payment skin)</span>
       </div>
       <nav class="menu" aria-label="Main navigation">
         <span class="pill">Unified • XLSX only</span>
@@ -90,7 +90,7 @@
   <div class="container hero">
     <p class="eyebrow">Unified data entry</p>
     <h1>Record, compute & export</h1>
-    <p style="max-width:760px">This application streamlines the collection of required sales data across channels. Export the consolidated table as an XLSX file and upload it to the appropriate Drive folder.</p>
+    <p style="max-width:760px">One app, two workflows. Choose a date and a sales channel; we’ll load the correct form with those values locked. All exports are XLSX.</p>
   </div>
 
   <main class="container">
@@ -118,16 +118,14 @@
         <div class="cta">
           <button class="btn primary" type="submit">Continue</button>
         </div>
-        <p class="subnote">Market/Hawking → Marketing sales. School/D2C/B2E → Marketing sales. The chosen Date & Channel will be locked in the form.</p>
+        <p class="subnote">Market/Hawking → BA payment. School/D2C/B2E → Marketing sales. The chosen Date & Channel will be locked in the form.</p>
       </form>
     </section>
 
-    <!-- ===== APP 1: Marketing sales (was BA payment UI) ===== -->
-    $1
-      <div class="cta" style="margin-top:6px">
-        <button class="btn" id="back-btn-1">Change channel</button>
-      </div>
-      <!-- Locked Sales Channel field for visibility (disabled) -->
+    <!-- ===== APP 1: BA payment (original UI) ===== -->
+    <section class="card hidden" id="app1">
+      <h2>BA payment</h2>
+      <!-- Injected locked Sales Channel field for visibility (disabled) -->
       <div class="row">
         <div class="span-6">
           <label for="bp-locked-channel">Sales channel (locked)</label>
@@ -142,7 +140,7 @@
         </div>
       </div>
 
-      <!-- ===== Former BA payment form (labels unchanged) ===== -->
+      <!-- ===== Original BA payment form (kept intact) ===== -->
       <section id="bp-form" style="margin-top:6px;">
         <form id="sales-form" autocomplete="off">
 
@@ -317,10 +315,8 @@
     </section>
 
     <!-- ===== APP 2: Marketing sales (ported into BA layout) ===== -->
-    $1
-      <div class="cta" style="margin-top:6px">
-        <button class="btn" id="back-btn-2">Change channel</button>
-      </div>
+    <section class="card hidden" id="app2">
+      <h2>Marketing sales</h2>
       <!-- Locked channel + date, BA style -->
       <div class="row">
         <div class="span-6">
@@ -378,6 +374,7 @@
           <div class="span-6"><label for="ms-qtyPortion">Qty (portion)</label><input type="number" id="ms-qtyPortion" inputmode="decimal" min="0" step="1" placeholder="e.g. 10"></div>
         </div>
         <div class="row">
+          <div class="span-6"><label for="ms-lineTotal">Line total (UGX)</label><input type="text" id="ms-lineTotal" disabled></div>
           <div class="span-6"><label for="ms-grandTotal">Transaction total (UGX)</label><input type="text" id="ms-grandTotal" disabled></div>
         </div>
 
@@ -452,7 +449,7 @@
   <footer>
     <div class="container">
       <small>
-        © <span id="year"></span> Marketing Sales — Unified. | <a id="source-link" href="#">Source code</a>
+        © <span id="year"></span> Sales Suite — BA look. | <a id="source-link" href="#">Source code</a>
       </small>
     </div>
   </footer>
@@ -492,7 +489,7 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Map external channel -> select value
+    // Map external channel -> BA select value
     const BA_CHANNEL_MAP = { 'Market':'Market sales', 'Hawking':'Hawking' };
 
     document.getElementById('selector-form').addEventListener('submit', (e)=>{
@@ -525,7 +522,7 @@
       }
     });
 
-    // ======= MARKET/HAWKING FLOW (former BA_Payment, logic unchanged) =======
+    // ======= BA PAYMENT: original logic (unchanged) =======
     (function BA_Payment(){
       // Helpers
       const UGX = (n) => (isFinite(n) ? Math.round(Number(n)) : 0);
@@ -733,13 +730,13 @@
         const rows = loadRecords(); if(rows.length === 0) return alert('No data to export');
         const headerMap = { date: 'Date', channel: 'Sales channel', prod: 'Product', sa: 'SA name', area: 'Selling area', price: 'Unit price (UGX)', weight: 'Portion weight (kg)', issuedP: 'Stock issued (portions)', issuedK: 'Stock issued (kg)', closingP: 'Closing balance (portions)', closingK: 'Closing balance (kg)', cashCollected: 'Cash collected (UGX)', actual: 'Actual sales (UGX)', discrepancy: 'Discrepancies (UGX)', rate: 'Commission rate (%)', commission: 'Commission (UGX)', flat: 'Flat wedge (UGX)', totalToPay: 'Total amount to be paid (UGX)', marketFees: 'Market fees (UGX)', advancedMarketFees: 'Advanced market fees (UGX)' };
         const exportRows = rows.map(r => { const o = {}; for (const [k,label] of Object.entries(headerMap)) { o[label] = r[k]; } return o; });
-        const ws = XLSX.utils.json_to_sheet(exportRows); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Marketing sales');
-        const pad = (n)=> String(n).padStart(2,'0'); const d = new Date(); const fname = `Marketing Sales - ${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.xlsx`;
+        const ws = XLSX.utils.json_to_sheet(exportRows); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'BA payment');
+        const pad = (n)=> String(n).padStart(2,'0'); const d = new Date(); const fname = `BA Payment - ${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.xlsx`;
         XLSX.writeFile(wb, fname);
       });
     })();
 
-    // ======= MARKETING SALES (School/D2C/B2E) =======
+    // ======= MARKETING SALES: adapted to BA layout, XLSX only, namespaced IDs =======
     (function Marketing(){
       const PRODUCTS = { "Fresh":{ unitPrice:6000, portionWeight:1.00, mode:"kg" }, "Fried":{ unitPrice:7500, portionWeight:1.00, mode:"kg" }, "Skewers":{ unitPrice:1000, portionWeight:0.06, mode:"portion" }, "Kikalayi":{ unitPrice:500, portionWeight:0.04, mode:"portion" } };
       const $ = (s)=>document.querySelector(s);
@@ -763,7 +760,7 @@
         if(cfg.mode==='kg'){ if(qKg>0){ qP=qKg/w; $('#ms-qtyPortion').value=qP>0?Math.round(qP):''; } $('#ms-qtyKg').disabled=false; $('#ms-qtyPortion').disabled=true; }
         else { if(qP>0){ qKg=qP*w; $('#ms-qtyKg').value=qKg>0?qKg.toFixed(2):''; } $('#ms-qtyKg').disabled=true; $('#ms-qtyPortion').disabled=false; }
         const total=(cfg.mode==='kg'?unit*qKg:unit*qP);
-        $('#ms-grandTotal').value=fmt(total);
+        $('#ms-lineTotal').value=fmt(total); $('#ms-grandTotal').value=fmt(total);
         const paid=num($('#ms-amountPaid').value); $('#ms-balance').value=fmt(Math.max(total-paid,0));
         $('#ms-calcMode').value=(cfg.mode==='kg'?'by kg':'by portion');
         $('#ms-friedWarn').classList.toggle('hidden', prod!=='Fried');
@@ -820,8 +817,7 @@
         const rows=load(); if(!rows.length){alert('No data to export.');return;}
         const header=["Date","Officer","Client","District","Area","Product","Calc","Unit UGX","Portion kg","Qty kg","Qty portion","Line Total","Pay Mode","Paid","Balance","Sample Product","Sample Qty (kg)","Sample Qty (portion)"];
         const exportRows = rows.map(r=>({
-          [header[0]]:r.date,[header[1]]:r.officer,[header[2]]:r.client,[header[3]]:r.district,[header[4]]:r.area,[header[5]]:r.product,[header[6]]:r.calcMode,[header[7]]:r.unitPrice,[header[8]]:(r.portionWeight||0).toFixed(2),[header[9]]:(r.qtyKg||0).toFixed(2),[header[10]]:r.qtyPortion,[header[11]]:r.lineTotal,[header[12]]:r.payMode,[header[13]]:r.paid,[header[14]]:r.balance,[header[15]]:r.sampleProduct||'',
-          [header[16]]:(r.sampleQtyKg||0).toFixed(2),[header[17]]:r.sampleQtyPortion }));
+          [header[0]]:r.date,[header[1]]:r.officer,[header[2]]:r.client,[header[3]]:r.district,[header[4]]:r.area,[header[5]]:r.product,[header[6]]:r.calcMode,[header[7]]:r.unitPrice,[header[8]]:(r.portionWeight||0).toFixed(2),[header[9]]:(r.qtyKg||0).toFixed(2),[header[10]]:r.qtyPortion,[header[11]]:r.lineTotal,[header[12]]:r.payMode,[header[13]]:r.paid,[header[14]]:r.balance,[header[15]]:r.sampleProduct||'',[header[16]]:(r.sampleQtyKg||0).toFixed(2),[header[17]]:r.sampleQtyPortion }));
         const ws = XLSX.utils.json_to_sheet(exportRows); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Marketing sales');
         const pad=(n)=> String(n).padStart(2,'0'); const d=new Date(); const fname=`field-data-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.xlsx`;
         XLSX.writeFile(wb, fname);
@@ -844,11 +840,6 @@
         document.getElementById('ms-clearFormBtn').addEventListener('click', (e)=>{ e.preventDefault(); clearForm(); });
       })();
     })();
-      // Back buttons → show selector again
-    function goBack(){ selectorCard.classList.toggle('hidden', false); app1.classList.add('hidden'); app2.classList.add('hidden'); window.scrollTo({top:0,behavior:'smooth'}); }
-    document.addEventListener('click', (e)=>{
-      if (e.target && (e.target.id==='back-btn-1' || e.target.id==='back-btn-2')) { e.preventDefault(); goBack(); }
-    });
   </script>
 </body>
 </html>
