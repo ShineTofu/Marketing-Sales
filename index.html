@@ -90,11 +90,11 @@
   <div class="container hero">
     <p class="eyebrow">Unified data entry</p>
     <h1>Record, compute & export</h1>
-    <p style="max-width:760px">One app, two workflows. Choose a date and a sales channel; we’ll load the correct form with those values locked. All exports are XLSX.</p>
+    <p style="max-width:760px">One app, two workflows. Choose a date, a district and a sales channel; we’ll load the correct form with those values locked. All exports are XLSX.</p>
   </div>
 
   <main class="container">
-    <!-- ===== STEP 1: Common selector (Date + Channel) ===== -->
+    <!-- ===== STEP 1: Common selector (Date + Channel + District) ===== -->
     <section class="card" id="selector">
       <h2>Start</h2>
       <form id="selector-form" autocomplete="off">
@@ -115,17 +115,27 @@
             </select>
           </div>
         </div>
+        <div class="row">
+          <div class="span-6">
+            <label for="sel-district">District</label>
+            <select id="sel-district" required>
+              <option value="">—</option>
+              <option value="Hoima">Hoima</option>
+              <option value="Buliisa">Buliisa</option>
+            </select>
+          </div>
+        </div>
         <div class="cta">
           <button class="btn primary" type="submit">Continue</button>
         </div>
-        <p class="subnote">Market/Hawking → BA payment. School/D2C/B2E → Marketing sales. The chosen Date & Channel will be locked in the form.</p>
+        <p class="subnote">Market/Hawking → BA payment. School/D2C/B2E → Marketing sales. The chosen Date, District & Channel will be locked in the form.</p>
       </form>
     </section>
 
     <!-- ===== APP 1: BA payment (original UI) ===== -->
     <section class="card hidden" id="app1">
       <h2>BA payment</h2>
-      <!-- Injected locked Sales Channel field for visibility (disabled) -->
+      <!-- Injected locked Sales Channel & District (disabled) -->
       <div class="row">
         <div class="span-6">
           <label for="bp-locked-channel">Sales channel (locked)</label>
@@ -139,8 +149,17 @@
           <input type="date" id="bp-locked-date" readonly />
         </div>
       </div>
+      <div class="row">
+        <div class="span-6">
+          <label for="bp-locked-district">District (locked)</label>
+          <select id="bp-locked-district" disabled>
+            <option value="Hoima">Hoima</option>
+            <option value="Buliisa">Buliisa</option>
+          </select>
+        </div>
+      </div>
 
-      <!-- ===== Original BA payment form (kept intact) ===== -->
+      <!-- ===== Original BA payment form (kept intact, with District added) ===== -->
       <section id="bp-form" style="margin-top:6px;">
         <form id="sales-form" autocomplete="off">
 
@@ -175,9 +194,16 @@
             </div>
           </div>
           <div class="row">
-            <div class="span-12">
+            <div class="span-6">
               <label for="area">Selling area</label>
               <input type="text" id="area" placeholder="Area / Market" required />
+            </div>
+            <div class="span-6">
+              <label for="bp-district">District</label>
+              <select id="bp-district" required>
+                <option value="Hoima">Hoima</option>
+                <option value="Buliisa">Buliisa</option>
+              </select>
             </div>
           </div>
 
@@ -290,6 +316,7 @@
                 <th>Product</th>
                 <th>SA name</th>
                 <th>Area</th>
+                <th>District</th>
                 <th>Unit price (UGX)</th>
                 <th>Portion weight (kg)</th>
                 <th>Issued (portions)</th>
@@ -317,7 +344,7 @@
     <!-- ===== APP 2: Marketing sales (ported into BA layout) ===== -->
     <section class="card hidden" id="app2">
       <h2>Marketing sales</h2>
-      <!-- Locked channel + date, BA style -->
+      <!-- Locked channel + date + district, BA style -->
       <div class="row">
         <div class="span-6">
           <label for="ms-locked-channel">Sales channel (locked)</label>
@@ -330,6 +357,15 @@
         <div class="span-6">
           <label for="ms-locked-date">Date (locked)</label>
           <input type="date" id="ms-locked-date" readonly />
+        </div>
+      </div>
+      <div class="row">
+        <div class="span-6">
+          <label for="ms-locked-district">District (locked)</label>
+          <select id="ms-locked-district" disabled>
+            <option value="Hoima">Hoima</option>
+            <option value="Buliisa">Buliisa</option>
+          </select>
         </div>
       </div>
 
@@ -465,6 +501,7 @@
     // ======= COMMON: selector logic & routing =======
     const selDate = document.getElementById('sel-date');
     const selChannel = document.getElementById('sel-channel');
+    const selDistrict = document.getElementById('sel-district');
     const selectorCard = document.getElementById('selector');
     const app1 = document.getElementById('app1');
     const app2 = document.getElementById('app2');
@@ -494,35 +531,41 @@
 
     document.getElementById('selector-form').addEventListener('submit', (e)=>{
       e.preventDefault();
-      const dt = selDate.value; const ch = selChannel.value;
+      const dt = selDate.value; const ch = selChannel.value; const dist = selDistrict.value;
       const tgt = routeTarget(ch);
-      if(!dt || !tgt){ alert('Please select Date and Sales channel.'); return; }
+      if(!dt || !tgt || !dist){ alert('Please select Date, Sales channel and District.'); return; }
 
       if(tgt==='app1'){
         // Lock banners
         document.getElementById('bp-locked-date').value = dt;
         document.getElementById('bp-locked-channel').value = BA_CHANNEL_MAP[ch] || '';
+        document.getElementById('bp-locked-district').value = dist;
         // Fill real form fields and lock them
         const bpDate = document.getElementById('date');
         const bpChannel = document.getElementById('channel');
+        const bpDistrict = document.getElementById('bp-district');
         if (bpDate){ bpDate.value = dt; bpDate.readOnly = true; }
         if (bpChannel){ bpChannel.value = BA_CHANNEL_MAP[ch] || ''; bpChannel.disabled = true; ['change','input'].forEach(ev=>bpChannel.dispatchEvent(new Event(ev))); }
+        if (bpDistrict){ bpDistrict.value = dist; bpDistrict.disabled = true; }
         showSection('app1');
       } else {
         // Marketing: lock banners
         document.getElementById('ms-locked-date').value = dt;
         const msLockedCh = document.getElementById('ms-locked-channel');
-        // ensure value exists among options
         if ([...msLockedCh.options].some(o=>o.value===ch)) { msLockedCh.value = ch; }
         else { msLockedCh.insertAdjacentHTML('beforeend', `<option value="${ch}">${ch}</option>`); msLockedCh.value = ch; }
-        // Fill real form fields and lock date
+        const msLockedDist = document.getElementById('ms-locked-district');
+        msLockedDist.value = dist;
+        // Fill real form fields and lock date + district
         const msDate = document.getElementById('ms-date');
         if (msDate){ msDate.value = dt; msDate.readOnly = true; }
+        const msDistrict = document.getElementById('ms-district');
+        if (msDistrict){ msDistrict.value = dist; msDistrict.disabled = true; }
         showSection('app2');
       }
     });
 
-    // ======= BA PAYMENT: original logic (unchanged) =======
+    // ======= BA PAYMENT: original logic (unchanged except District support) =======
     (function BA_Payment(){
       // Helpers
       const UGX = (n) => (isFinite(n) ? Math.round(Number(n)) : 0);
@@ -545,6 +588,7 @@
       const commissionRate = el('commissionRate');
       const marketFees = el('marketFees');
       const advancedMarketFees = el('advancedMarketFees');
+      const bpDistrict = el('bp-district');
 
       const kpiDis = el('kpi-discrepancy');
       const kpiCom = el('kpi-commission');
@@ -553,7 +597,7 @@
       const form = el('sales-form');
       const tbody = el('tbody');
 
-      const STORAGE_KEY = 'ba_payment_records_v1_2';
+      const STORAGE_KEY = 'ba_payment_records_v1_3'; // bumped for district field
       const loadRecords = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
       const saveRecords = (rows) => localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
 
@@ -588,7 +632,7 @@
       function updateRequired(){
         const feesOnly = isFeesOnlyMode();
         el('date').required = true;
-        const requiredIds = [ 'channel','product','sa','area','unitPrice','portionWeight','issuedPortions','closingPortions','cash','commissionRate','flatRate' ];
+        const requiredIds = [ 'channel','product','sa','area','bp-district','unitPrice','portionWeight','issuedPortions','closingPortions','cash','commissionRate','flatRate' ];
         requiredIds.forEach(id => { const node = el(id); if (!node) return; node.required = !feesOnly; });
       }
 
@@ -650,6 +694,7 @@
         const prod = product.value;
         const sa = el('sa').value;
         const area = el('area').value;
+        const district = (bpDistrict && bpDistrict.value) || '';
         const price = UGX(num(unitPrice.value));
         const weight = Number(num(portionWeight.value).toFixed(3));
         const issuedP = UGX(num(issuedPortions.value));
@@ -665,7 +710,7 @@
         const totalToPay  = UGX(flat + commission - discrepancy);
         const mFees = UGX(num(marketFees.value));
         const aFees = UGX(num(advancedMarketFees.value));
-        return { date, channel, prod, sa, area, price, weight, issuedP, issuedK, closingP, closingK, cashCollected, actual, discrepancy, rate: effectiveRate, commission, flat, totalToPay, marketFees: mFees, advancedMarketFees: aFees };
+        return { date, channel, prod, sa, area, district, price, weight, issuedP, issuedK, closingP, closingK, cashCollected, actual, discrepancy, rate: effectiveRate, commission, flat, totalToPay, marketFees: mFees, advancedMarketFees: aFees };
       }
 
       function renderTable(){
@@ -674,17 +719,18 @@
         rows.forEach((r, idx) => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td>${r.date}</td>
+            <td>${r.date||''}</td>
             <td>${r.channel||''}</td>
             <td>${r.prod||''}</td>
             <td>${r.sa||''}</td>
             <td>${r.area||''}</td>
+            <td>${r.district||''}</td>
             <td>${(r.price||0).toLocaleString()}</td>
-            <td>${(r.weight||0).toFixed(3)}</td>
+            <td>${((r.weight??0)).toFixed(3)}</td>
             <td>${r.issuedP||0}</td>
-            <td>${(r.issuedK||0).toFixed(3)}</td>
+            <td>${((r.issuedK??0)).toFixed(3)}</td>
             <td>${r.closingP||0}</td>
-            <td>${(r.closingK||0).toFixed(3)}</td>
+            <td>${((r.closingK??0)).toFixed(3)}</td>
             <td>${(r.cashCollected||0).toLocaleString()}</td>
             <td>${(r.actual||0).toLocaleString()}</td>
             <td>${(r.discrepancy||0).toLocaleString()}</td>
@@ -717,7 +763,7 @@
       function ensureRequired(){
         if (!el('date').value) { alert('Please fill: Date'); return false; }
         if (isFeesOnlyMode()) return true;
-        const fields = [ ['channel','Sales channel'], ['product','Product'], ['sa','SA name'], ['area','Selling area'], ['unitPrice','Unit price'], ['portionWeight','Portion weight'], ['issuedPortions','Stock issued (portions)'], ['closingPortions','Closing balance (portions)'], ['cash','Cash collected'], ['commissionRate','Commission rate'], ['flatRate','Flat wedge'] ];
+        const fields = [ ['channel','Sales channel'], ['product','Product'], ['sa','SA name'], ['area','Selling area'], ['bp-district','District'], ['unitPrice','Unit price'], ['portionWeight','Portion weight'], ['issuedPortions','Stock issued (portions)'], ['closingPortions','Closing balance (portions)'], ['cash','Cash collected'], ['commissionRate','Commission rate'], ['flatRate','Flat wedge'] ];
         for (const [id,label] of fields){ const n = el(id); if (!n || n.value === '' || n.value === null) { alert('Please fill: ' + label); return false; } }
         return true;
       }
@@ -728,7 +774,7 @@
 
       document.getElementById('export-xlsx').addEventListener('click', () => {
         const rows = loadRecords(); if(rows.length === 0) return alert('No data to export');
-        const headerMap = { date: 'Date', channel: 'Sales channel', prod: 'Product', sa: 'SA name', area: 'Selling area', price: 'Unit price (UGX)', weight: 'Portion weight (kg)', issuedP: 'Stock issued (portions)', issuedK: 'Stock issued (kg)', closingP: 'Closing balance (portions)', closingK: 'Closing balance (kg)', cashCollected: 'Cash collected (UGX)', actual: 'Actual sales (UGX)', discrepancy: 'Discrepancies (UGX)', rate: 'Commission rate (%)', commission: 'Commission (UGX)', flat: 'Flat wedge (UGX)', totalToPay: 'Total amount to be paid (UGX)', marketFees: 'Market fees (UGX)', advancedMarketFees: 'Advanced market fees (UGX)' };
+        const headerMap = { date: 'Date', channel: 'Sales channel', prod: 'Product', sa: 'SA name', area: 'Selling area', district: 'District', price: 'Unit price (UGX)', weight: 'Portion weight (kg)', issuedP: 'Stock issued (portions)', issuedK: 'Stock issued (kg)', closingP: 'Closing balance (portions)', closingK: 'Closing balance (kg)', cashCollected: 'Cash collected (UGX)', actual: 'Actual sales (UGX)', discrepancy: 'Discrepancies (UGX)', rate: 'Commission rate (%)', commission: 'Commission (UGX)', flat: 'Flat wedge (UGX)', totalToPay: 'Total amount to be paid (UGX)', marketFees: 'Market fees (UGX)', advancedMarketFees: 'Advanced market fees (UGX)' };
         const exportRows = rows.map(r => { const o = {}; for (const [k,label] of Object.entries(headerMap)) { o[label] = r[k]; } return o; });
         const ws = XLSX.utils.json_to_sheet(exportRows); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'BA payment');
         const pad = (n)=> String(n).padStart(2,'0'); const d = new Date(); const fname = `BA Payment - ${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.xlsx`;
@@ -824,7 +870,7 @@
       }
 
       function clearAll(){ if(!confirm('Delete ALL stored data?')) return; localStorage.removeItem(KEY); render(); }
-      function clearForm(){ $('#ms-officer').value=''; $('#ms-client').value=''; $('#ms-district').value='Hoima'; $('#ms-area').value=''; $('#ms-product').value='Fresh'; setDefaults(); $('#ms-amountPaid').value=0; $('#ms-sampleProduct').value=''; $('#ms-sampleQtyKg').value=''; $('#ms-sampleQtyPortion').value=''; setSampleConstraints(); }
+      function clearForm(){ $('#ms-officer').value=''; $('#ms-client').value=''; /* keep locked ms-district as is */ $('#ms-area').value=''; $('#ms-product').value='Fresh'; setDefaults(); $('#ms-amountPaid').value=0; $('#ms-sampleProduct').value=''; $('#ms-sampleQtyKg').value=''; $('#ms-sampleQtyPortion').value=''; setSampleConstraints(); }
 
       // Events
       (function init(){
