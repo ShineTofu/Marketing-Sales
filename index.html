@@ -78,7 +78,414 @@
     <div class="container nav">
       <div class="brand">
         <div class="logo" aria-hidden="true">BA</div>
-        <span class="app-logo-text">Sales</span> Sales Suite — BA look. | <a id="source-link" href="#">Source code</a>
+        <span>Sales</span>
+      </div>
+      <nav class="menu" aria-label="Main navigation">
+        <span class="pill">Unified • XLSX only</span>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== Hero / Intro ===== -->
+  <div class="container hero">
+    <p class="eyebrow">Unified data entry</p>
+    <h1>Record, compute & export</h1>
+    <p style="max-width:760px">One app, two workflows. Choose a date, a district and a sales channel; we’ll load the correct form with those values locked. All exports are XLSX.</p>
+  </div>
+
+  <main class="container">
+    <!-- ===== STEP 1: Common selector (Date + Channel + District) ===== -->
+    <section class="card" id="selector">
+      <h2>Start</h2>
+      <form id="selector-form" autocomplete="off">
+        <div class="row">
+          <div class="span-6">
+            <label for="sel-date">Date</label>
+            <input type="date" id="sel-date" required />
+          </div>
+          <div class="span-6">
+            <label for="sel-channel">Sales channel</label>
+            <select id="sel-channel" required>
+              <option value="">—</option>
+              <option value="Market">Market</option>
+              <option value="Hawking">Hawking</option>
+              <option value="School">School</option>
+              <option value="D2C">D2C</option>
+              <option value="B2E">B2E</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="span-6">
+            <label for="sel-district">District</label>
+            <select id="sel-district" required>
+              <option value="">—</option>
+              <option value="Hoima">Hoima</option>
+              <option value="Buliisa">Buliisa</option>
+            </select>
+          </div>
+        </div>
+        <div class="cta">
+          <button class="btn primary" type="submit">Continue</button>
+        </div>
+        <p class="subnote">Market/Hawking → BA payment. School/D2C/B2E → Marketing sales. The chosen Date, District & Channel will be locked in the form.</p>
+      </form>
+    </section>
+
+    <!-- ===== APP 1: BA payment (original UI) ===== -->
+    <section class="card hidden" id="app1">
+      <h2>BA payment</h2>
+      <!-- Injected locked Sales Channel & District (disabled) -->
+      <div class="row">
+        <div class="span-6">
+          <label for="bp-locked-channel">Sales channel (locked)</label>
+          <select id="bp-locked-channel" disabled>
+            <option value="Market sales">Market sales</option>
+            <option value="Hawking">Hawking</option>
+          </select>
+        </div>
+        <div class="span-6">
+          <label for="bp-locked-date">Date (locked)</label>
+          <input type="date" id="bp-locked-date" readonly />
+        </div>
+      </div>
+      <div class="row">
+        <div class="span-6">
+          <label for="bp-locked-district">District (locked)</label>
+          <select id="bp-locked-district" disabled>
+            <option value="Hoima">Hoima</option>
+            <option value="Buliisa">Buliisa</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- ===== Original BA payment form (kept intact, with District added) ===== -->
+      <section id="bp-form" style="margin-top:6px;">
+        <form id="sales-form" autocomplete="off">
+
+          <!-- General information -->
+          <h3>General information</h3>
+          <div class="row">
+            <div class="span-6">
+              <label for="date">Date</label>
+              <input type="date" id="date" required />
+            </div>
+            <div class="span-6">
+              <label for="channel">Sales channel</label>
+              <select id="channel" required>
+                <option value="">—</option>
+                <option value="Market sales">Market sales</option>
+                <option value="Hawking">Hawking</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="span-6">
+              <label for="product">Product</label>
+              <select id="product" required>
+                <option value="">—</option>
+                <option value="Kikalayi">Kikalayi</option>
+                <option value="Skewers">Skewers</option>
+              </select>
+            </div>
+            <div class="span-6">
+              <label for="sa">SA name</label>
+              <input type="text" id="sa" placeholder="Agent name" required />
+            </div>
+          </div>
+          <div class="row">
+            <div class="span-6">
+              <label for="area">Selling area</label>
+              <input type="text" id="area" placeholder="Area / Market" required />
+            </div>
+            <div class="span-6">
+              <label for="bp-district">District</label>
+              <select id="bp-district" required>
+                <option value="Hoima">Hoima</option>
+                <option value="Buliisa">Buliisa</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Product -->
+          <h3>Product</h3>
+          <div class="row">
+            <div class="span-6">
+              <label for="unitPrice">Unit price (UGX)</label>
+              <input type="number" id="unitPrice" step="1" min="0" />
+            </div>
+            <div class="span-6">
+              <label for="portionWeight">Portion weight (kg)</label>
+              <input type="number" id="portionWeight" step="0.001" min="0" />
+            </div>
+          </div>
+          <div class="row">
+            <div class="span-6">
+              <label for="issuedPortions">Stock issued (portions)</label>
+              <input type="number" id="issuedPortions" step="1" min="0" />
+            </div>
+            <div class="span-6">
+              <label for="issuedKg">Stock issued (kg)</label>
+              <input type="number" id="issuedKg" step="0.001" readonly />
+            </div>
+          </div>
+          <div class="row">
+            <div class="span-6">
+              <label for="closingPortions">Closing balance (portions)</label>
+              <input type="number" id="closingPortions" step="1" min="0" />
+            </div>
+            <div class="span-6">
+              <label for="closingKg">Closing balance (kg)</label>
+              <input type="number" id="closingKg" step="0.001" readonly />
+            </div>
+          </div>
+
+          <!-- Financial data -->
+          <h3>Financial data</h3>
+          <div class="row">
+            <div class="span-6">
+              <label for="cash">Cash collected (UGX)</label>
+              <input type="number" id="cash" step="1" min="0" />
+            </div>
+            <div class="span-6">
+              <label for="actualSales">Actual sales (UGX)</label>
+              <input type="number" id="actualSales" step="1" min="0" readonly />
+            </div>
+          </div>
+          <div class="row">
+            <div class="span-6">
+              <label for="flatRate">Flat wedge (UGX)</label>
+              <input type="number" id="flatRate" step="1" min="0" />
+            </div>
+            <div class="span-6">
+              <label for="commissionRate">Commission rate (%)</label>
+              <input type="number" id="commissionRate" step="0.1" min="0" max="100" />
+            </div>
+          </div>
+
+          <div class="kpi" style="margin-top: 6px;">
+            <div class="tile sm-4">
+              <div class="caption">Discrepancies (UGX)</div>
+              <div class="value" id="kpi-discrepancy">0</div>
+            </div>
+            <div class="tile sm-4">
+              <div class="caption">Commission (UGX)</div>
+              <div class="value" id="kpi-commission">0</div>
+            </div>
+            <div class="tile sm-4">
+              <div class="caption">Total amount to be paid (UGX)</div>
+              <div class="value" id="kpi-total">0</div>
+            </div>
+          </div>
+
+          <!-- Specifics -->
+          <h3>Specifics</h3>
+          <div class="row">
+            <div class="span-6">
+              <label for="marketFees">Market fees (UGX)</label>
+              <input type="number" id="marketFees" step="1" min="0" />
+            </div>
+            <div class="span-6">
+              <label for="advancedMarketFees">Advanced market fees (UGX)</label>
+              <input type="number" id="advancedMarketFees" step="1" min="0" />
+            </div>
+          </div>
+
+          <div class="cta" style="margin-top: 14px;">
+            <button class="btn primary" type="submit">Record data</button>
+            <button class="btn" type="button" id="reset-form">Reset</button>
+            <button class="btn warn" type="button" id="clear-data">Clear all data</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card" id="records" style="margin-top:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+          <h2 style="margin:0">Records</h2>
+          <div class="cta">
+            <button class="btn warn" id="export-xlsx">Export XLSX</button>
+          </div>
+        </div>
+
+        <div style="overflow:auto; max-height: 55vh; margin-top:10px; border:1px solid var(--border); border-radius: 12px;">
+          <table id="table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Channel</th>
+                <th>Product</th>
+                <th>SA name</th>
+                <th>Area</th>
+                <th>District</th>
+                <th>Unit price (UGX)</th>
+                <th>Portion weight (kg)</th>
+                <th>Issued (portions)</th>
+                <th>Issued (kg)</th>
+                <th>Closing (portions)</th>
+                <th>Closing (kg)</th>
+                <th>Cash collected (UGX)</th>
+                <th>Actual sales (UGX)</th>
+                <th>Discrepancies (UGX)</th>
+                <th>Commission rate (%)</th>
+                <th>Commission (UGX)</th>
+                <th>Flat wedge (UGX)</th>
+                <th>Total to pay (UGX)</th>
+                <th>Market fees (UGX)</th>
+                <th>Advanced market fees (UGX)</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <!-- ===== APP 2: Marketing sales (ported into BA layout) ===== -->
+    <section class="card hidden" id="app2">
+      <h2>Marketing sales</h2>
+      <!-- Locked channel + date + district, BA style -->
+      <div class="row">
+        <div class="span-6">
+          <label for="ms-locked-channel">Sales channel (locked)</label>
+          <select id="ms-locked-channel" disabled>
+            <option value="School">School</option>
+            <option value="D2C">D2C</option>
+            <option value="B2E">B2E</option>
+          </select>
+        </div>
+        <div class="span-6">
+          <label for="ms-locked-date">Date (locked)</label>
+          <input type="date" id="ms-locked-date" readonly />
+        </div>
+      </div>
+      <div class="row">
+        <div class="span-6">
+          <label for="ms-locked-district">District (locked)</label>
+          <select id="ms-locked-district" disabled>
+            <option value="Hoima">Hoima</option>
+            <option value="Buliisa">Buliisa</option>
+          </select>
+        </div>
+      </div>
+
+      <section id="ms-form" style="margin-top:6px;">
+        <h3>New record</h3>
+        <div class="row">
+          <div class="span-6"><label for="ms-date">Date</label><input type="date" id="ms-date" required></div>
+          <div class="span-6"><label for="ms-officer">Channel officer name *</label><input type="text" id="ms-officer" placeholder="Full name" required></div>
+        </div>
+        <div class="row">
+          <div class="span-6"><label for="ms-client">Client name *</label><input type="text" id="ms-client" placeholder="Client" required></div>
+          <div class="span-6"><label for="ms-district">District</label>
+            <select id="ms-district"><option>Hoima</option><option>Buliisa</option></select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="span-12"><label for="ms-area">Area</label><input type="text" id="ms-area" placeholder="Area / Market"></div>
+        </div>
+
+        <h3>Product</h3>
+        <div class="row">
+          <div class="span-6">
+            <label for="ms-product">Product</label>
+            <select id="ms-product">
+              <option value="Fresh">Fresh</option>
+              <option value="Fried">Fried</option>
+              <option value="Skewers">Skewers</option>
+              <option value="Kikalayi">Kikalayi</option>
+            </select>
+            <div id="ms-friedWarn" class="subnote hidden" style="margin-top:6px">
+              ⚠️ <strong>FRIED pricing note</strong> — “1 kg of Fried” is priced by <em>fresh (pre-fry)</em> weight.
+            </div>
+          </div>
+          <div class="span-6"><label for="ms-unitPrice">Unit price (UGX)</label><input type="number" id="ms-unitPrice" inputmode="decimal" min="0" step="1"></div>
+        </div>
+        <div class="row">
+          <div class="span-6"><label for="ms-portionWeight">Portion weight (kg)</label><input type="number" id="ms-portionWeight" inputmode="decimal" min="0" step="0.01"></div>
+          <div class="span-6"><label for="ms-calcMode">Calculation</label><input type="text" id="ms-calcMode" disabled></div>
+        </div>
+        <div class="row">
+          <div class="span-6"><label for="ms-qtyKg">Qty (kg)</label><input type="number" id="ms-qtyKg" inputmode="decimal" min="0" step="0.01" placeholder="e.g. 2.5"></div>
+          <div class="span-6"><label for="ms-qtyPortion">Qty (portion)</label><input type="number" id="ms-qtyPortion" inputmode="decimal" min="0" step="1" placeholder="e.g. 10"></div>
+        </div>
+        <div class="row">
+          <div class="span-6"><label for="ms-lineTotal">Line total (UGX)</label><input type="text" id="ms-lineTotal" disabled></div>
+          <div class="span-6"><label for="ms-grandTotal">Transaction total (UGX)</label><input type="text" id="ms-grandTotal" disabled></div>
+        </div>
+
+        <h3>Financial data</h3>
+        <div class="row">
+          <div class="span-6"><label for="ms-payMode">Payment mode</label>
+            <select id="ms-payMode"><option>Cash</option><option>MoMo</option></select>
+          </div>
+          <div class="span-6"><label for="ms-amountPaid">Amount paid (UGX)</label><input type="number" id="ms-amountPaid" inputmode="numeric" min="0" step="1" value="0"></div>
+        </div>
+        <div class="row">
+          <div class="span-6"><label for="ms-balance">Balance (UGX)</label><input type="text" id="ms-balance" disabled></div>
+        </div>
+
+        <h3>Sample</h3>
+        <div class="row">
+          <div class="span-6"><label for="ms-sampleProduct">Sample product</label>
+            <select id="ms-sampleProduct">
+              <option value="">— None —</option>
+              <option value="Fresh">Fresh</option>
+              <option value="Fried">Fried</option>
+              <option value="Skewers">Skewers</option>
+              <option value="Kikalayi">Kikalayi</option>
+            </select>
+          </div>
+          <div class="span-6"><label for="ms-sampleQtyKg">Sample Qty (kg)</label>
+            <input type="number" id="ms-sampleQtyKg" inputmode="decimal" min="0" step="0.01" placeholder="0">
+            <div class="subnote" id="ms-sampleKgHint">Auto for portion-based products</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="span-6"><label for="ms-sampleQtyPortion">Sample Qty (portion)</label>
+            <input type="number" id="ms-sampleQtyPortion" inputmode="decimal" min="0" step="1" placeholder="0">
+            <div class="subnote" id="ms-samplePortionHint">Auto for kg-based products</div>
+          </div>
+        </div>
+
+        <div class="cta" style="margin-top:10px">
+          <button class="btn primary" id="ms-addBtn">Record data</button>
+          <button class="btn" id="ms-clearFormBtn">Reset</button>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+          <h2 style="margin:0">Records</h2>
+          <div class="cta" style="margin:0">
+            <!-- XLSX only -->
+            <button class="btn warn" id="ms-exportXlsxBtn">Export XLSX</button>
+            <button class="btn" id="ms-clearAllBtn">Clear all data</button>
+          </div>
+        </div>
+        <div style="overflow:auto; max-height: 55vh; margin-top:10px; border:1px solid var(--border); border-radius: 12px;">
+          <table id="ms-dataTable">
+            <thead>
+              <tr>
+                <th>Date</th><th>Officer</th><th>Client</th><th>District</th><th>Area</th>
+                <th>Product</th><th>Calc</th><th>Unit UGX</th><th>Portion kg</th>
+                <th>Qty kg</th><th>Qty portion</th><th>Line Total</th>
+                <th>Pay Mode</th><th>Paid</th><th>Balance</th>
+                <th>Sample Product</th><th>Sample Qty (kg)</th><th>Sample Qty (portion)</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ms-tableBody"></tbody>
+          </table>
+        </div>
+        <div class="cta" id="ms-totalsBar" style="justify-content:flex-end"></div>
+      </section>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <small>
+        © <span id="year"></span> Sales Suite — BA look. | <a id="source-link" href="#">Source code</a>
       </small>
     </div>
   </footer>
