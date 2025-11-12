@@ -166,8 +166,11 @@
 
           <!-- General information -->
           <h3>General information</h3>
-          <!-- Date field removed from BA Payment form; using locked header date -->
           <div class="row">
+            <div class="span-6">
+              <label for="date">Date</label>
+              <input type="date" id="date" required />
+            </div>
             <div class="span-6">
               <label for="channel">Sales channel</label>
               <select id="channel" required>
@@ -370,7 +373,7 @@
       <section id="ms-form" style="margin-top:6px;">
         <h3>New record</h3>
         <div class="row">
-          <!-- Date field removed from Marketing form; using locked header date -->
+          <div class="span-6"><label for="ms-date">Date</label><input type="date" id="ms-date" required></div>
           <div class="span-6"><label for="ms-officer">Channel officer name *</label><input type="text" id="ms-officer" placeholder="Full name" required></div>
         </div>
         <div class="row">
@@ -539,7 +542,10 @@
         document.getElementById('bp-locked-channel').value = BA_CHANNEL_MAP[ch] || '';
         document.getElementById('bp-locked-district').value = dist;
         // Fill real form fields and lock them
-        const bpDateLocked = document.getElementById('bp-locked-date');
+        const bpDate = document.getElementById('date');
+        const bpChannel = document.getElementById('channel');
+        const bpDistrict = document.getElementById('bp-district');
+        if (bpDate){ bpDate.value = dt; bpDate.readOnly = true; }
         if (bpChannel){ bpChannel.value = BA_CHANNEL_MAP[ch] || ''; bpChannel.disabled = true; ['change','input'].forEach(ev=>bpChannel.dispatchEvent(new Event(ev))); }
         if (bpDistrict){ bpDistrict.value = dist; bpDistrict.disabled = true; }
         showSection('app1');
@@ -552,7 +558,8 @@
         const msLockedDist = document.getElementById('ms-locked-district');
         msLockedDist.value = dist;
         // Fill real form fields and lock date + district
-        // Fill real form fields and lock date + district
+        const msDate = document.getElementById('ms-date');
+        if (msDate){ msDate.value = dt; msDate.readOnly = true; }
         const msDistrict = document.getElementById('ms-district');
         if (msDistrict){ msDistrict.value = dist; msDistrict.disabled = true; }
         showSection('app2');
@@ -625,6 +632,7 @@
 
       function updateRequired(){
         const feesOnly = isFeesOnlyMode();
+        el('date').required = true;
         const requiredIds = [ 'channel','product','sa','area','bp-district','unitPrice','portionWeight','issuedPortions','closingPortions','cash','commissionRate','flatRate' ];
         requiredIds.forEach(id => { const node = el(id); if (!node) return; node.required = !feesOnly; });
       }
@@ -663,11 +671,14 @@
         } else { warnedCashOver = false; }
       };
 
-            }
+      function setTodaySafe() {
+        const d = el('date');
+        try { d.valueAsDate = new Date(); } catch { d.value = new Date().toISOString().slice(0,10); }
+      }
 
       (function init(){
         // Defaults on initial page load; real locking happens after selector submit
-        commissionRate.value = 20; flatRate.value = 5000; applyChannelDefaults(); applyProductDefaults(); compute(); renderTable(); updateRequired();
+        commissionRate.value = 20; flatRate.value = 5000; setTodaySafe(); applyChannelDefaults(); applyProductDefaults(); compute(); renderTable(); updateRequired();
       })();
 
       ['input','change'].forEach(evt => {
@@ -679,7 +690,7 @@
       [marketFees, advancedMarketFees].forEach(x => { x.addEventListener('input', updateRequired); x.addEventListener('change', updateRequired); });
 
       function collectFormData(){
-        const date = document.getElementById('bp-locked-date').value;
+        const date = el('date').value;
         const channel = el('channel').value;
         const prod = product.value;
         const sa = el('sa').value;
@@ -748,17 +759,18 @@
         compute();
         const row = collectFormData();
         const rows = loadRecords(); rows.unshift(row); saveRecords(rows); renderTable();
-        form.reset(); commissionRate.value = 20; flatRate.value = 5000; applyChannelDefaults(); applyProductDefaults(); compute(); updateRequired();
+        form.reset(); setTodaySafe(); commissionRate.value = 20; flatRate.value = 5000; applyChannelDefaults(); applyProductDefaults(); compute(); updateRequired();
       });
 
       function ensureRequired(){
+        if (!el('date').value) { alert('Please fill: Date'); return false; }
         if (isFeesOnlyMode()) return true;
         const fields = [ ['channel','Sales channel'], ['product','Product'], ['sa','SA name'], ['area','Selling area'], ['bp-district','District'], ['unitPrice','Unit price'], ['portionWeight','Portion weight'], ['issuedPortions','Stock issued (portions)'], ['closingPortions','Closing balance (portions)'], ['cash','Cash collected'], ['commissionRate','Commission rate'], ['flatRate','Flat wedge'] ];
         for (const [id,label] of fields){ const n = el(id); if (!n || n.value === '' || n.value === null) { alert('Please fill: ' + label); return false; } }
         return true;
       }
 
-      document.getElementById('reset-form').addEventListener('click', () => { form.reset(); commissionRate.value = 20; flatRate.value = 5000; applyChannelDefaults(); applyProductDefaults(); compute(); updateRequired(); });
+      document.getElementById('reset-form').addEventListener('click', () => { form.reset(); setTodaySafe(); commissionRate.value = 20; flatRate.value = 5000; applyChannelDefaults(); applyProductDefaults(); compute(); updateRequired(); });
       document.getElementById('clear-data').addEventListener('click', () => { if(confirm('Clear all saved records?')) { localStorage.setItem(STORAGE_KEY, '[]'); renderTable(); } });
       ;[cash, marketFees, advancedMarketFees].forEach(x => x.addEventListener('input', compute));
 
@@ -825,7 +837,7 @@
         const total=(cfg.mode==='kg'?unit*qKg:unit*qP);
         const paid=num($('#ms-amountPaid').value); const bal=Math.max(total-paid,0);
         const sProd=$('#ms-sampleProduct').value||''; const sKg=num($('#ms-sampleQtyKg').value); const sP=num($('#ms-sampleQtyPortion').value);
-        return { date:document.getElementById('ms-locked-date').value, officer:$('#ms-officer').value.trim(), client:$('#ms-client').value.trim(), district:$('#ms-district').value, area:$('#ms-area').value.trim(), product:prod, calcMode:(cfg.mode==='kg'?'kg':'portion'), unitPrice:unit, portionWeight:w, qtyKg:qKg||0, qtyPortion:qP||0, lineTotal:Math.round(total), payMode:$('#ms-payMode').value, paid:Math.round(paid), balance:Math.round(bal), sampleProduct:sProd, sampleQtyKg:sKg||0, sampleQtyPortion:sP||0 };
+        return { date:$('#ms-date').value, officer:$('#ms-officer').value.trim(), client:$('#ms-client').value.trim(), district:$('#ms-district').value, area:$('#ms-area').value.trim(), product:prod, calcMode:(cfg.mode==='kg'?'kg':'portion'), unitPrice:unit, portionWeight:w, qtyKg:qKg||0, qtyPortion:qP||0, lineTotal:Math.round(total), payMode:$('#ms-payMode').value, paid:Math.round(paid), balance:Math.round(bal), sampleProduct:sProd, sampleQtyKg:sKg||0, sampleQtyPortion:sP||0 };
       }
 
       function render(){
@@ -864,7 +876,7 @@
 
       // Events
       (function init(){
-        setDefaults(); setSampleConstraints(); calc(); render();
+        document.getElementById('ms-date').value=todayISO(); setDefaults(); setSampleConstraints(); calc(); render();
         document.getElementById('ms-product').addEventListener('change', setDefaults);
         ['#ms-unitPrice','#ms-portionWeight','#ms-qtyKg','#ms-qtyPortion','#ms-amountPaid'].forEach(s=>$(s).addEventListener('input', calc));
         document.getElementById('ms-sampleProduct').addEventListener('change', setSampleConstraints);
