@@ -26,7 +26,6 @@
     header { position: sticky; top: 0; backdrop-filter: blur(6px); background: color-mix(in oklab, var(--beige) 65%, #fff 35%); border-bottom: 1px solid var(--border); z-index: 10; }
     .nav { display:flex; align-items:center; justify-content:space-between; padding: 14px 0; }
     .brand { display:flex; align-items:center; gap:10px; font-weight:800; }
-    /* .logo removed in markup; keeping the class here is harmless, but can be deleted if you want */
     .logo { width: 30px; height: 30px; border-radius: 10px; background: var(--green); color: #fff; display:grid; place-items:center; font-weight:900; }
     .menu { display:flex; gap:16px; color: var(--muted); }
 
@@ -45,7 +44,7 @@
     .eyebrow { color: var(--muted); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; font-size: 12px; }
     .cta { margin-top: 14px; display:flex; gap:10px; flex-wrap: wrap; }
 
-    .btn { border: 1px solid var(--border); background: #fff; color: var(--text); padding: 10px 16px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+    .btn { border: 1px solid var(--border); background: #fff; color: #000; padding: 10px 16px; border-radius: 12px; font-weight: 700; cursor: pointer; }
     .btn.primary { background: var(--green); color: #fff; border-color: transparent; }
     .btn.warn { background: var(--orange); color:#222; border-color: transparent; }
     .pill { border-radius: 999px; padding: 6px 10px; background: #fef3c7; color: #92400e; font-weight: 700; font-size: 12px; }
@@ -68,7 +67,6 @@
 
     footer { border-top: 1px solid var(--border); color: var(--muted); padding: 18px 0 40px; font-size: 14px; }
 
-    /* helper */
     .hidden{ display:none !important; }
     .subnote{ color:var(--muted); font-size:12px; }
   </style>
@@ -78,7 +76,6 @@
   <header>
     <div class="container nav">
       <div class="brand">
-        <!-- Removed the green BA logo box -->
         <span>Sales</span>
       </div>
       <nav class="menu" aria-label="Main navigation">
@@ -264,7 +261,7 @@
             </div>
           </div>
 
-          <div class="kpi" style="margin-top: 6px;">
+          <div class="kpi" style="margin-top: 6px;" aria-live="polite" aria-atomic="true">
             <div class="tile sm-4">
               <div class="caption">Discrepancies (UGX)</div>
               <div class="value" id="kpi-discrepancy">0</div>
@@ -410,9 +407,12 @@
           <div class="span-6"><label for="ms-qtyKg">Qty (kg)</label><input type="number" id="ms-qtyKg" inputmode="decimal" min="0" step="0.01" placeholder="e.g. 2.5"></div>
           <div class="span-6"><label for="ms-qtyPortion">Qty (portion)</label><input type="number" id="ms-qtyPortion" inputmode="decimal" min="0" step="1" placeholder="e.g. 10"></div>
         </div>
+        <!-- ↓↓↓ Removed the 'Line total' UI; only Transaction total kept -->
         <div class="row">
-          <div class="span-6"><label for="ms-lineTotal">Line total (UGX)</label><input type="text" id="ms-lineTotal" disabled></div>
-          <div class="span-6"><label for="ms-grandTotal">Transaction total (UGX)</label><input type="text" id="ms-grandTotal" disabled></div>
+          <div class="span-12">
+            <label for="ms-grandTotal">Transaction total (UGX)</label>
+            <input type="text" id="ms-grandTotal" disabled>
+          </div>
         </div>
 
         <h3>Financial data</h3>
@@ -470,7 +470,7 @@
               <tr>
                 <th>Date</th><th>Officer</th><th>Client</th><th>District</th><th>Area</th>
                 <th>Product</th><th>Calc</th><th>Unit UGX</th><th>Portion kg</th>
-                <th>Qty kg</th><th>Qty portion</th><th>Line Total</th>
+                <th>Qty kg</th><th>Qty portion</th><th>Transaction Total</th>
                 <th>Pay Mode</th><th>Paid</th><th>Balance</th>
                 <th>Sample Product</th><th>Sample Qty (kg)</th><th>Sample Qty (portion)</th><th>Actions</th>
               </tr>
@@ -620,13 +620,13 @@
         const ch = el('channel').value;
         if (ch === 'Market sales') { flatRate.value = 5000; commissionRate.value = 20; }
         else if (ch === 'Hawking') { flatRate.value = 0; commissionRate.value = 20; }
-        else if (ch === '') { flatRate.value = 0; commissionRate.value = 0; }
+        else { /* leave as-is */ }
         compute();
       }
 
       document.addEventListener('wheel', (e) => {
-        const t = e.target; if (t && t.tagName === 'INPUT' && t.type === 'number') { t.blur(); }
-      }, { passive: true });
+        const t = e.target; if (t && t.tagName === 'INPUT' && t.type === 'number' && document.activeElement === t) { e.preventDefault(); }
+      }, { passive: false });
 
       function isFeesOnlyMode(){ return num(marketFees.value) > 0 || num(advancedMarketFees.value) > 0; }
 
@@ -638,6 +638,8 @@
       }
 
       let warnedCashOver = false;
+
+      const UGXfmt = new Intl.NumberFormat('en-UG', { maximumFractionDigits: 0 });
 
       const compute = () => {
         const w = num(portionWeight.value);
@@ -662,9 +664,9 @@
         const commission  = UGX((effectiveRate / 100) * UGX(actual));
         const totalToPay  = UGX(flatVal + commission - discrepancy);
 
-        kpiDis.textContent   = UGX(discrepancy).toLocaleString();
-        kpiCom.textContent   = UGX(commission).toLocaleString();
-        kpiTotal.textContent = UGX(totalToPay).toLocaleString();
+        kpiDis.textContent   = UGXfmt.format(UGX(discrepancy));
+        kpiCom.textContent   = UGXfmt.format(UGX(commission));
+        kpiTotal.textContent = UGXfmt.format(UGX(totalToPay));
 
         if (discrepancy < 0) {
           if (!warnedCashOver) { alert(`Warning: Cash collected exceeds computed sales by ${Math.abs(discrepancy).toLocaleString()} UGX.`); warnedCashOver = true; }
@@ -677,7 +679,6 @@
       }
 
       (function init(){
-        // Defaults on initial page load; real locking happens after selector submit
         commissionRate.value = 20; flatRate.value = 5000; setTodaySafe(); applyChannelDefaults(); applyProductDefaults(); compute(); renderTable(); updateRequired();
       })();
 
@@ -742,13 +743,14 @@
             <td>${(r.totalToPay||0).toLocaleString()}</td>
             <td>${(r.marketFees||0).toLocaleString()}</td>
             <td>${(r.advancedMarketFees||0).toLocaleString()}</td>
-            <td><button class="btn" data-del="${idx}">Delete</button></td>`;
+            <td><button class="btn" aria-label="Delete row ${idx + 1}" data-del="${idx}">Delete</button></td>`;
           tbody.appendChild(tr);
         });
       }
 
       document.getElementById('tbody').addEventListener('click', (e) => {
         const btn = e.target.closest('button[data-del]'); if(!btn) return;
+        if(!confirm('Delete this row?')) return;
         const idx = Number(btn.dataset.del);
         const rows = loadRecords(); rows.splice(idx, 1); saveRecords(rows); renderTable();
       });
@@ -770,7 +772,10 @@
         return true;
       }
 
-      document.getElementById('reset-form').addEventListener('click', () => { form.reset(); setTodaySafe(); commissionRate.value = 20; flatRate.value = 5000; applyChannelDefaults(); applyProductDefaults(); compute(); updateRequired(); });
+      document.getElementById('reset-form').addEventListener('click', () => {
+        form.reset();
+        applyProductDefaults(); applyChannelDefaults(); compute(); updateRequired();
+      });
       document.getElementById('clear-data').addEventListener('click', () => { if(confirm('Clear all saved records?')) { localStorage.setItem(STORAGE_KEY, '[]'); renderTable(); } });
       ;[cash, marketFees, advancedMarketFees].forEach(x => x.addEventListener('input', compute));
 
@@ -805,10 +810,16 @@
         const unit= num($('#ms-unitPrice').value||cfg.unitPrice);
         const w =   num($('#ms-portionWeight').value||cfg.portionWeight);
         let qKg=   num($('#ms-qtyKg').value), qP=num($('#ms-qtyPortion').value);
-        if(cfg.mode==='kg'){ if(qKg>0){ qP=qKg/w; $('#ms-qtyPortion').value=qP>0?Math.round(qP):''; } $('#ms-qtyKg').disabled=false; $('#ms-qtyPortion').disabled=true; }
-        else { if(qP>0){ qKg=qP*w; $('#ms-qtyKg').value=qKg>0?qKg.toFixed(2):''; } $('#ms-qtyKg').disabled=true; $('#ms-qtyPortion').disabled=false; }
+        if(cfg.mode==='kg'){
+          if(qKg>0){ qP=qKg/w; $('#ms-qtyPortion').value=qP>0?Math.round(qP):''; }
+          $('#ms-qtyKg').disabled=false; $('#ms-qtyPortion').disabled=true;
+        } else {
+          if(qP>0){ qKg=qP*w; $('#ms-qtyKg').value=qKg>0?qKg.toFixed(2):''; }
+          $('#ms-qtyKg').disabled=true; $('#ms-qtyPortion').disabled=false;
+        }
         const total=(cfg.mode==='kg'?unit*qKg:unit*qP);
-        $('#ms-lineTotal').value=fmt(total); $('#ms-grandTotal').value=fmt(total);
+        // Only keep grand total
+        $('#ms-grandTotal').value = fmt(total);
         const paid=num($('#ms-amountPaid').value); $('#ms-balance').value=fmt(Math.max(total-paid,0));
         $('#ms-calcMode').value=(cfg.mode==='kg'?'by kg':'by portion');
         $('#ms-friedWarn').classList.toggle('hidden', prod!=='Fried');
@@ -837,7 +848,14 @@
         const total=(cfg.mode==='kg'?unit*qKg:unit*qP);
         const paid=num($('#ms-amountPaid').value); const bal=Math.max(total-paid,0);
         const sProd=$('#ms-sampleProduct').value||''; const sKg=num($('#ms-sampleQtyKg').value); const sP=num($('#ms-sampleQtyPortion').value);
-        return { date:$('#ms-date').value, officer:$('#ms-officer').value.trim(), client:$('#ms-client').value.trim(), district:$('#ms-district').value, area:$('#ms-area').value.trim(), product:prod, calcMode:(cfg.mode==='kg'?'kg':'portion'), unitPrice:unit, portionWeight:w, qtyKg:qKg||0, qtyPortion:qP||0, lineTotal:Math.round(total), payMode:$('#ms-payMode').value, paid:Math.round(paid), balance:Math.round(bal), sampleProduct:sProd, sampleQtyKg:sKg||0, sampleQtyPortion:sP||0 };
+        return {
+          date:$('#ms-date').value, officer:$('#ms-officer').value.trim(), client:$('#ms-client').value.trim(),
+          district:$('#ms-district').value, area:$('#ms-area').value.trim(), product:prod,
+          calcMode:(cfg.mode==='kg'?'kg':'portion'), unitPrice:unit, portionWeight:w,
+          qtyKg:qKg||0, qtyPortion:qP||0, grandTotal:Math.round(total),
+          payMode:$('#ms-payMode').value, paid:Math.round(paid), balance:Math.round(bal),
+          sampleProduct:sProd, sampleQtyKg:sKg||0, sampleQtyPortion:sP||0
+        };
       }
 
       function render(){
@@ -849,13 +867,16 @@
           tr.appendChild(td(r.district)); tr.appendChild(td(r.area)); tr.appendChild(td(r.product));
           tr.appendChild(td(r.calcMode)); tr.appendChild(td(fmt(r.unitPrice)));
           tr.appendChild(td((r.portionWeight||0).toFixed(2))); tr.appendChild(td((r.qtyKg||0).toFixed(2)));
-          tr.appendChild(td(r.qtyPortion||0)); tr.appendChild(td(fmt(r.lineTotal)));
+          tr.appendChild(td(r.qtyPortion||0)); tr.appendChild(td(fmt(r.grandTotal))); // only Transaction Total
           tr.appendChild(td(r.payMode)); tr.appendChild(td(fmt(r.paid))); tr.appendChild(td(fmt(r.balance)));
           tr.appendChild(td(r.sampleProduct||'')); tr.appendChild(td((r.sampleQtyKg||0).toFixed(2))); tr.appendChild(td(r.sampleQtyPortion||0));
-          const a=document.createElement('td'); const b=document.createElement('button'); b.className='btn'; b.textContent='Delete'; b.onclick=()=>{ const rws=load(); rws.splice(i,1); save(rws); render(); }; a.appendChild(b); tr.appendChild(a);
+          const a=document.createElement('td'); const b=document.createElement('button'); b.className='btn'; b.textContent='Delete';
+          b.setAttribute('aria-label', `Delete row ${i+1}`);
+          b.onclick=()=>{ if(!confirm('Delete this row?')) return; const rws=load(); rws.splice(i,1); save(rws); render(); };
+          a.appendChild(b); tr.appendChild(a);
           tb.appendChild(tr);
         });
-        const totals=rows.reduce((a,r)=>({total:a.total+r.lineTotal,paid:a.paid+r.paid,bal:a.bal+r.balance}),{total:0,paid:0,bal:0});
+        const totals=rows.reduce((a,r)=>({total:a.total+r.grandTotal,paid:a.paid+r.paid,bal:a.bal+r.balance}),{total:0,paid:0,bal:0});
         const bar=$('#ms-totalsBar'); bar.innerHTML='';
         const pill = (l,v)=>{ const d=document.createElement('div'); d.className='pill'; d.textContent=`${l}: UGX ${fmt(v)}`; return d; };
         bar.appendChild(pill('Total', totals.total)); bar.appendChild(pill('Paid', totals.paid)); bar.appendChild(pill('Balance', totals.bal));
@@ -863,16 +884,18 @@
 
       function exportXLSX(){
         const rows=load(); if(!rows.length){alert('No data to export.');return;}
-        const header=["Date","Officer","Client","District","Area","Product","Calc","Unit UGX","Portion kg","Qty kg","Qty portion","Line Total","Pay Mode","Paid","Balance","Sample Product","Sample Qty (kg)","Sample Qty (portion)"];
+        // Removed "Line Total", kept "Transaction Total"
+        const header=["Date","Officer","Client","District","Area","Product","Calc","Unit UGX","Portion kg","Qty kg","Qty portion","Transaction Total","Pay Mode","Paid","Balance","Sample Product","Sample Qty (kg)","Sample Qty (portion)"];
         const exportRows = rows.map(r=>({
-          [header[0]]:r.date,[header[1]]:r.officer,[header[2]]:r.client,[header[3]]:r.district,[header[4]]:r.area,[header[5]]:r.product,[header[6]]:r.calcMode,[header[7]]:r.unitPrice,[header[8]]:(r.portionWeight||0).toFixed(2),[header[9]]:(r.qtyKg||0).toFixed(2),[header[10]]:r.qtyPortion,[header[11]]:r.lineTotal,[header[12]]:r.payMode,[header[13]]:r.paid,[header[14]]:r.balance,[header[15]]:r.sampleProduct||'',[header[16]]:(r.sampleQtyKg||0).toFixed(2),[header[17]]:r.sampleQtyPortion }));
+          [header[0]]:r.date,[header[1]]:r.officer,[header[2]]:r.client,[header[3]]:r.district,[header[4]]:r.area,[header[5]]:r.product,[header[6]]:r.calcMode,[header[7]]:r.unitPrice,[header[8]]:(r.portionWeight||0).toFixed(2),[header[9]]:(r.qtyKg||0).toFixed(2),[header[10]]:r.qtyPortion,[header[11]]:r.grandTotal,[header[12]]:r.payMode,[header[13]]:r.paid,[header[14]]:r.balance,[header[15]]:r.sampleProduct||'',[header[16]]:(r.sampleQtyKg||0).toFixed(2),[header[17]]:r.sampleQtyPortion
+        }));
         const ws = XLSX.utils.json_to_sheet(exportRows); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Marketing sales');
         const pad=(n)=> String(n).padStart(2,'0'); const d=new Date(); const fname=`field-data-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.xlsx`;
         XLSX.writeFile(wb, fname);
       }
 
       function clearAll(){ if(!confirm('Delete ALL stored data?')) return; localStorage.removeItem(KEY); render(); }
-      function clearForm(){ $('#ms-officer').value=''; $('#ms-client').value=''; /* keep locked ms-district as is */ $('#ms-area').value=''; $('#ms-product').value='Fresh'; setDefaults(); $('#ms-amountPaid').value=0; $('#ms-sampleProduct').value=''; $('#ms-sampleQtyKg').value=''; $('#ms-sampleQtyPortion').value=''; setSampleConstraints(); }
+      function clearForm(){ $('#ms-officer').value=''; $('#ms-client').value=''; $('#ms-area').value=''; $('#ms-product').value='Fresh'; setDefaults(); $('#ms-amountPaid').value=0; $('#ms-sampleProduct').value=''; $('#ms-sampleQtyKg').value=''; $('#ms-sampleQtyPortion').value=''; setSampleConstraints(); }
 
       // Events
       (function init(){
